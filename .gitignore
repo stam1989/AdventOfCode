@@ -31,7 +31,9 @@
 *.out
 *.app
 
-.build
-.BUILD
-.Build
-.bUILD
+build
+BUILD
+Build
+bUILD
+
+.vs
