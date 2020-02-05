@@ -35,15 +35,15 @@ void PrintOpcodes(std::vector<int>& opcodes)
 
 void CopyResultIntoFile(std::vector<int>& opcodes)
 {
-	std::string OUTPUT_FILE = "C:\Users\stam1989\source\repos\AdventOfCode\resources\Day2_output.txt";
+	std::string OUTPUT_FILE = "resources/Day2_output.txt";
 	std::ofstream output_file(OUTPUT_FILE);
-	std::ostream_iterator<int> output_iterator(output_file, ',');
+	std::ostream_iterator<int> output_iterator(output_file, ",");
 	std::copy(opcodes.begin(), opcodes.end(), output_iterator);
 }
 
 int main(int argc, char* argv[])
 {
-	std::string FILE = "C:/Users/stam1989/Desktop/c++/Hello1/example/Day2_input.txt";
+    std::string FILE = "resources/Day2_input.txt";
 
 	std::ifstream input(FILE);
 	std::string code;

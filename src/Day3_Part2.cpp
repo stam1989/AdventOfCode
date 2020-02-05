@@ -5,6 +5,7 @@
 #include <iterator>
 #include <sstream>
 #include <array>
+#include <algorithm>
 
 struct Coords
 {
@@ -120,8 +121,8 @@ void GetIntersectons(Coordinates coordinates, Intersections& intersections)
 	std::cout << "Getintersections starts \n ";
 	std::cout << "coords[0].size(): " << coordinates[0].size() << std::endl;
 	std::cout << "coords[1].size(): " << coordinates[1].size() << std::endl;
-	std::sort(coordinates[0].begin(), coordinates[0].end(), CompareByX);
-	std::sort(coordinates[1].begin(), coordinates[1].end(), CompareByX);
+	sort(coordinates[0].begin(), coordinates[0].end(), CompareByX);
+	sort(coordinates[1].begin(), coordinates[1].end(), CompareByX);
 
 	//set_intersection(coordinates[0].begin(), coordinates[0].end(), coordinates[1].begin(), coordinates[1].end(), back_inserter(intersections));
 
@@ -145,13 +146,13 @@ bool CompareBySteps(const Coords& a, const Coords& b)
 
 void PrintSortestDistance(Intersections& intersections)
 {
-	std::sort(intersections.begin(), intersections.end(), CompareBySteps);
+	sort(intersections.begin(), intersections.end(), CompareBySteps);
 	std::cout << "\nSortest intersection steps: " << intersections.front().steps;
 }
 
 int main(int argc, char* argv[])
 {
-	std::string FILE = "C:\Users\stam1989\source\repos\AdventOfCode\resources\Day3.txt";
+    std::string FILE = "resources/Day3.txt";
 
 	std::ifstream input(FILE);
 	Wires wires;
