@@ -11,6 +11,10 @@
 #include <string>
 #include <vector>
 #include <iterator>
+#include <algorithm>
+#include <array>
+#include <future>
+#include <exception>
 
 enum OpCode
 {
@@ -24,6 +28,7 @@ enum OpCode
 	OP_EQUALS = 8,
 	OP_TERMINATE = 99
 };
+
 
 void InitializingMemory(std::string FILE, std::vector<int>& opcodes)
 {
@@ -56,8 +61,9 @@ void FillWithZeros(std::vector<int>& param_modes)
 }
 
 
-bool Operation(std::vector<int>& opcodes)
+int Operation(std::vector<int>& opcodes, int input)
 {
+	int res;
 	std::cout << "\nOperation!!\n";
 	int i = 0;
 	while (i < opcodes.size())
@@ -98,16 +104,17 @@ bool Operation(std::vector<int>& opcodes)
 		}
 		case OpCode::OP_IN:
 		{
-			int temp;
-			std::cout << "Give an int:";
-			std::cin >> temp;
-			opcodes[opcodes[i + 1]] = temp;
+// 			int temp;
+// 			std::cout << "Give an int:";
+// 			std::cin >> temp;
+			opcodes[opcodes[i + 1]] = input;
 			i += 2;
 			break;
 		}
 		case OpCode::OP_OUT:
 		{
 			std::cout << "Position " << opcodes[i + 1] << ", num: " << opcodes[opcodes[i + 1]] << std::endl;
+			res = opcodes[opcodes[i + 1]];
 			i += 2;
 			break;
 		}
@@ -162,15 +169,13 @@ bool Operation(std::vector<int>& opcodes)
 		case OpCode::OP_TERMINATE:
 		{
 			std::cout << "Terminate!! \n";
-			return true;
+			return res;
 		}
 		default:
 		{
-			std::cout << "wrong opcode!!!! \n";
-			return false;
+			throw("wrong opcode!!!! \n");
 		}
 		}
-
 	}
 }
 
@@ -184,6 +189,22 @@ void PrintOpcodes(std::vector<int>& opcodes)
 }
 
 
+void StartAmplifiers(std::array<int, 5>& settings, std::vector<int>& opcodes)
+{
+	try
+	{
+		for (auto setting : settings)
+		{
+			
+			std::future<int> ampl1 = std::async(Operation, std::ref(opcodes), 0);
+		}
+	}
+	catch(std::string e)
+	{
+		std::cout << e;
+	}
+}
+
 int main(int argc, char* argv[])
 {
 	std::string FILE = "resources/Day7.txt";
@@ -191,7 +212,24 @@ int main(int argc, char* argv[])
 	std::vector<int> opcodes;
 
 	InitializingMemory(FILE, opcodes);
-	Operation(opcodes);
+	
+	
+	std::array<int, 5> settings{{0, 1, 2, 3, 4}};
+	
+	std::sort (settings.begin(),settings.end());
+	
+	std::cout << "The 3! possible permutations with 3 elements:\n";
+	do {
+// 		std::cout << settings[0] << ' ' << settings[1] << ' ' << settings[2] << ' ' 
+// 		<< settings[3] << ' ' << settings[4] << '\n';
+		StartAmplifiers(settings, opcodes);
+		
+	} while ( std::next_permutation(settings.begin(), settings.end()) );
+	
+	
+	
+	
+// 	Operation(opcodes);
 	//    PrintOpcodes(opcodes);
 
 	return 0;
