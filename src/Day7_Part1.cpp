@@ -16,6 +16,7 @@
 #include <future>
 #include <exception>
 
+
 enum OpCode
 {
 	OP_ADD = 1,
@@ -52,6 +53,7 @@ void InitializingMemory(std::string FILE, std::vector<int>& opcodes)
 		std::cout << o << ", ";
 }
 
+
 void FillWithZeros(std::vector<int>& param_modes)
 {
 	while (param_modes.size() < 2)
@@ -61,9 +63,10 @@ void FillWithZeros(std::vector<int>& param_modes)
 }
 
 
-int Operation(std::vector<int>& opcodes, int input)
+int Operation(std::vector<int> opcodes, std::future<int>& f_input, int phase_setting)
 {
 	int res;
+    int op_in_counter = 0;
 	std::cout << "\nOperation!!\n";
 	int i = 0;
 	while (i < opcodes.size())
@@ -104,11 +107,18 @@ int Operation(std::vector<int>& opcodes, int input)
 		}
 		case OpCode::OP_IN:
 		{
-// 			int temp;
-// 			std::cout << "Give an int:";
-// 			std::cin >> temp;
-			opcodes[opcodes[i + 1]] = input;
+            if(op_in_counter == 0)
+            {
+                opcodes[opcodes[i + 1]] = phase_setting;
+            }
+            else
+            {
+                int input = f_input.get();
+                opcodes[opcodes[i + 1]] = input;
+            }
+
 			i += 2;
+            ++op_in_counter;
 			break;
 		}
 		case OpCode::OP_OUT:
@@ -179,6 +189,7 @@ int Operation(std::vector<int>& opcodes, int input)
 	}
 }
 
+
 void PrintOpcodes(std::vector<int>& opcodes)
 {
 	for (auto& opcode : opcodes)
@@ -193,17 +204,41 @@ void StartAmplifiers(std::array<int, 5>& settings, std::vector<int>& opcodes)
 {
 	try
 	{
-		for (auto setting : settings)
-		{
-			
-			std::future<int> ampl1 = std::async(Operation, std::ref(opcodes), 0);
-		}
+        std::promise<int> p_amp1;
+        std::future<int> f1 = p_amp1.get_future();
+        std::future<int> f_ampl1 = std::async(Operation, opcodes, std::ref(f1), settings[0]);
+        p_amp1.set_value(0);
+
+        std::promise<int> p_amp2;
+        std::future<int> f2 = p_amp2.get_future();
+        std::future<int> f_ampl2 = std::async(Operation, opcodes, std::ref(f2), settings[1]);
+        p_amp2.set_value(f_ampl1.get());
+
+        std::promise<int> p_amp3;
+        std::future<int> f3 = p_amp3.get_future();
+        std::future<int> f_ampl3 = std::async(Operation, opcodes, std::ref(f3),settings[2]);
+        p_amp3.set_value(f_ampl2.get());
+
+        std::promise<int> p_amp4;
+        std::future<int> f4 = p_amp4.get_future();
+        std::future<int> f_ampl4 = std::async(Operation, opcodes, std::ref(f4), settings[3]);
+        p_amp4.set_value(f_ampl3.get());
+
+        std::promise<int> p_amp5;
+        std::future<int> f5 = p_amp5.get_future();
+        std::future<int> f_ampl5 = std::async(Operation, opcodes, std::ref(f5), settings[4]);
+        p_amp5.set_value(f_ampl4.get());
+
+        std::cout << "Result is: " << f_ampl5.get() << std::endl;
+
 	}
 	catch(std::string e)
 	{
 		std::cout << e;
 	}
 }
+
+
 
 int main(int argc, char* argv[])
 {
@@ -213,20 +248,13 @@ int main(int argc, char* argv[])
 
 	InitializingMemory(FILE, opcodes);
 	
-	
 	std::array<int, 5> settings{{0, 1, 2, 3, 4}};
 	
-	std::sort (settings.begin(),settings.end());
-	
-	std::cout << "The 3! possible permutations with 3 elements:\n";
-	do {
-// 		std::cout << settings[0] << ' ' << settings[1] << ' ' << settings[2] << ' ' 
-// 		<< settings[3] << ' ' << settings[4] << '\n';
+	do
+    {
 		StartAmplifiers(settings, opcodes);
-		
-	} while ( std::next_permutation(settings.begin(), settings.end()) );
-	
-	
+	}
+	while ( std::next_permutation(settings.begin(), settings.end()) );
 	
 	
 // 	Operation(opcodes);
