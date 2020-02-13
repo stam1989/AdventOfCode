@@ -11,41 +11,56 @@
 #include <string>
 #include <vector>
 #include <iterator>
+#include <algorithm>
+#include <array>
+#include <future>
+#include <exception>
+#include <sstream>
+
 
 enum OpCode
 {
-	OP_ADD = 1,
-	OP_MUL = 2,
-	OP_IN = 3,
-	OP_OUT = 4,
-	OP_JUMP_IF_TRUE = 5,
-	OP_JUMP_IF_FALSE = 6,
-	OP_LESS_THAN = 7,
-	OP_EQUALS = 8,
-	OP_TERMINATE = 99
+	OP_ADD = 1, // adds together numbers read from two positions and stores the result in a third position
+	OP_MUL = 2, // multiplies together numbers read from two positions and stores the result in a third position
+	OP_IN = 3,  // takes a single integer as input and saves it to the position given by its only parameter
+	OP_OUT = 4, // outputs the value of its only parameter
+	OP_JUMP_IF_TRUE = 5,  // if the first parameter is non-zero, it sets the instruction pointer to the value from the second parameter. Otherwise, it does nothing.
+	OP_JUMP_IF_FALSE = 6, // if the first parameter is zero, it sets the instruction pointer to the value from the second parameter. Otherwise, it does nothing.
+	OP_LESS_THAN = 7, // if the first parameter is less than the second parameter, it stores 1 in the position given by the third parameter.
+	OP_EQUALS = 8, // if the first parameter is equal to the second parameter, it stores 1 in the position given by the third parameter. Otherwise, it stores 0.
+	OP_TERMINATE = 99 // the program is finished and should immediately halt
 };
+/// 1 == immediate mode
+/// 0 == position mode
+
 
 void InitializingMemory(std::string FILE, std::vector<int>& opcodes)
 {
 	opcodes.clear();
 	std::ifstream input(FILE);
 	std::string code;
-	if (input.is_open())
+	try
 	{
-		while (std::getline(input, code, ','))
+		if (input.is_open())
 		{
-			opcodes.push_back(stoi(code, nullptr, 10));
+			while (std::getline(input, code, ','))
+			{
+				opcodes.push_back(stoi(code, nullptr, 10));
+			}
+			input.close();
 		}
-		input.close();
+		else
+		{
+			std::string exception_string =  "Could not open input file";
+			throw std::runtime_error(exception_string);
+		}
 	}
-	else
+	catch(std::string& exception_string)
 	{
-		std::cout << "could not open input file: " << FILE << std::endl;
+		std::cout << exception_string << std::endl;
 	}
-
-	for (auto o : opcodes)
-		std::cout << o << ", ";
 }
+
 
 void FillWithZeros(std::vector<int>& param_modes)
 {
@@ -56,18 +71,22 @@ void FillWithZeros(std::vector<int>& param_modes)
 }
 
 
-bool Operation(std::vector<int>& opcodes)
+int Operation(std::vector<int> opcodes, std::future<int>& f_input, int phase_setting)
 {
-	std::cout << "\nOperation!!\n";
-	int i = 0;
-	while (i < opcodes.size())
+	int res;
+    int op_in_counter = 0;
+// 	std::cout << "\nOperation!!\n";
+	int ip = 0;
+	while (ip < opcodes.size())
 	{
-		int opcode = opcodes[i];
-		int temp;
-		std::vector<int> param_modes;
+		int opcode = opcodes[ip];
+//         std::thread::id this_id = std::this_thread::get_id();
+//         std::cout << "THREAD ID: " << this_id << ", Setting: " << phase_setting << ", Opcode: " << opcode << std::endl;
 
-		opcode = opcodes[i] % 100;
-		temp = opcodes[i] / 100;
+        int temp;
+		std::vector<int> param_modes;
+		opcode = opcodes[ip] % 100;
+		temp = opcodes[ip] / 100;
 
 		while (temp)
 		{
@@ -81,117 +100,180 @@ bool Operation(std::vector<int>& opcodes)
 		case OpCode::OP_ADD:
 		{
 			int arg1, arg2;
-			arg1 = (param_modes[0] == 0) ? opcodes[opcodes[i + 1]] : opcodes[i + 1];
-			arg2 = (param_modes[1] == 0) ? opcodes[opcodes[i + 2]] : opcodes[i + 2];
-			opcodes[opcodes[i + 3]] = arg1 + arg2;
-			i += 4;
+			arg1 = (param_modes[0] == 0) ? opcodes[opcodes[ip + 1]] : opcodes[ip + 1];
+			arg2 = (param_modes[1] == 0) ? opcodes[opcodes[ip + 2]] : opcodes[ip + 2];
+			opcodes[opcodes[ip + 3]] = arg1 + arg2;
+			ip += 4;
 			break;
 		}
 		case OpCode::OP_MUL:
 		{
 			int arg1, arg2;
-			arg1 = (param_modes[0] == 0) ? opcodes[opcodes[i + 1]] : opcodes[i + 1];
-			arg2 = (param_modes[1] == 0) ? opcodes[opcodes[i + 2]] : opcodes[i + 2];
-			opcodes[opcodes[i + 3]] = arg1 * arg2;
-			i += 4;
+			arg1 = (param_modes[0] == 0) ? opcodes[opcodes[ip + 1]] : opcodes[ip + 1];
+			arg2 = (param_modes[1] == 0) ? opcodes[opcodes[ip + 2]] : opcodes[ip + 2];
+			opcodes[opcodes[ip + 3]] = arg1 * arg2;
+			ip += 4;
 			break;
 		}
 		case OpCode::OP_IN:
 		{
-			int temp;
-			std::cout << "Give an int:";
-			std::cin >> temp;
-			opcodes[opcodes[i + 1]] = temp;
-			i += 2;
+            if(op_in_counter == 0)
+            {
+                opcodes[opcodes[ip + 1]] = phase_setting;
+            }
+            else
+            {
+                int input = f_input.get();
+                opcodes[opcodes[ip + 1]] = input;
+            }
+
+			ip += 2;
+            ++op_in_counter;
 			break;
 		}
 		case OpCode::OP_OUT:
 		{
-			std::cout << "Position " << opcodes[i + 1] << ", num: " << opcodes[opcodes[i + 1]] << std::endl;
-			i += 2;
+// 			std::cout << "Position " << opcodes[ip + 1] << ", num: " << opcodes[opcodes[ip + 1]] << std::endl;
+			res = opcodes[opcodes[ip + 1]];
+			ip += 2;
 			break;
 		}
 		case OpCode::OP_JUMP_IF_TRUE:
 		{
 			int arg1, arg2;
-			arg1 = (param_modes[0] == 0) ? opcodes[opcodes[i + 1]] : opcodes[i + 1];
-			arg2 = (param_modes[1] == 0) ? opcodes[opcodes[i + 2]] : opcodes[i + 2];
+			arg1 = (param_modes[0] == 0) ? opcodes[opcodes[ip + 1]] : opcodes[ip + 1];
+			arg2 = (param_modes[1] == 0) ? opcodes[opcodes[ip + 2]] : opcodes[ip + 2];
 			if (arg1 != 0)
 			{
-				opcodes[i] = arg2;
+				ip = arg2;
 				break;
 			}
-			i += 3;
+			ip += 3;
 			break;
 		}
 		case OpCode::OP_JUMP_IF_FALSE:
 		{
 			int arg1, arg2;
-			arg1 = (param_modes[0] == 0) ? opcodes[opcodes[i + 1]] : opcodes[i + 1];
-			arg2 = (param_modes[1] == 0) ? opcodes[opcodes[i + 2]] : opcodes[i + 2];
+			arg1 = (param_modes[0] == 0) ? opcodes[opcodes[ip + 1]] : opcodes[ip + 1];
+			arg2 = (param_modes[1] == 0) ? opcodes[opcodes[ip + 2]] : opcodes[ip + 2];
 			if (arg1 == 0)
 			{
-				opcodes[i] = arg2;
+				ip = arg2;
 				break;
 			}
-			i += 3;
+			ip += 3;
 			break;
 		}
 		case OpCode::OP_LESS_THAN:
 		{
 			int arg1, arg2;
-			arg1 = (param_modes[0] == 0) ? opcodes[opcodes[i + 1]] : opcodes[i + 1];
-			arg2 = (param_modes[1] == 0) ? opcodes[opcodes[i + 2]] : opcodes[i + 2];
+			arg1 = (param_modes[0] == 0) ? opcodes[opcodes[ip + 1]] : opcodes[ip + 1];
+			arg2 = (param_modes[1] == 0) ? opcodes[opcodes[ip + 2]] : opcodes[ip + 2];
 
-			opcodes[opcodes[i + 3]] = (arg1 < arg2) ? 1 : 0;
+			opcodes[opcodes[ip + 3]] = (arg1 < arg2) ? 1 : 0;
 
-			i += 4;
+			ip += 4;
 			break;
 		}
 		case OpCode::OP_EQUALS:
 		{
 			int arg1, arg2;
-			arg1 = (param_modes[0] == 0) ? opcodes[opcodes[i + 1]] : opcodes[i + 1];
-			arg2 = (param_modes[1] == 0) ? opcodes[opcodes[i + 2]] : opcodes[i + 2];
+			arg1 = (param_modes[0] == 0) ? opcodes[opcodes[ip + 1]] : opcodes[ip + 1];
+			arg2 = (param_modes[1] == 0) ? opcodes[opcodes[ip + 2]] : opcodes[ip + 2];
 
-			opcodes[opcodes[i + 3]] = (arg1 == arg2) ? 1 : 0;
+			opcodes[opcodes[ip + 3]] = (arg1 == arg2) ? 1 : 0;
 
-			i += 4;
+			ip += 4;
 			break;
 		}
 		case OpCode::OP_TERMINATE:
 		{
-			std::cout << "Terminate!! \n";
-			return true;
+// 			std::cout << "Terminate!!\n";
+			return res;
 		}
 		default:
 		{
-			std::cout << "wrong opcode!!!! \n";
-			return false;
+            std::stringstream ss;
+            ss << "wrong opcode!!!!\n ";
+            ss << "OPCODE: " << opcode << "\n";
+            ss << "Program counter: " << ip << "\n";
+			throw std::runtime_error(ss.str());
 		}
 		}
-
 	}
 }
 
-void PrintOpcodes(std::vector<int>& opcodes)
+
+// void PrintOpcodes(std::vector<int>& opcodes)
+// {
+// 	for (auto& opcode : opcodes)
+// 	{
+// 		std::cout << opcode << ",";
+// 	}
+// 	std::cout << std::endl;
+// }
+
+
+void StartAmplifiers(std::array<int, 5>& settings, std::vector<int>& opcodes, std::vector<int>& res)
 {
-	for (auto& opcode : opcodes)
+// 	std::cout << "Phase Settings: " << settings[0] << ", " << settings[1] << ", " << settings[2] << ", " << settings[3] << ", "
+// 	<< settings[4] << std::endl;
+
+	try
 	{
-		std::cout << opcode << ",";
+        std::promise<int> p_amp1;
+        std::future<int> f1 = p_amp1.get_future();
+        std::future<int> f_ampl1 = std::async(Operation, opcodes, std::ref(f1), settings[0]);
+        p_amp1.set_value(0);
+
+        std::promise<int> p_amp2;
+        std::future<int> f2 = p_amp2.get_future();
+        std::future<int> f_ampl2 = std::async(Operation, opcodes, std::ref(f2), settings[1]);
+        p_amp2.set_value(f_ampl1.get());
+
+        std::promise<int> p_amp3;
+        std::future<int> f3 = p_amp3.get_future();
+        std::future<int> f_ampl3 = std::async(Operation, opcodes, std::ref(f3),settings[2]);
+        p_amp3.set_value(f_ampl2.get());
+
+        std::promise<int> p_amp4;
+        std::future<int> f4 = p_amp4.get_future();
+        std::future<int> f_ampl4 = std::async(Operation, opcodes, std::ref(f4), settings[3]);
+        p_amp4.set_value(f_ampl3.get());
+
+        std::promise<int> p_amp5;
+        std::future<int> f5 = p_amp5.get_future();
+        std::future<int> f_ampl5 = std::async(Operation, opcodes, std::ref(f5), settings[4]);
+        p_amp5.set_value(f_ampl4.get());
+
+		res.emplace_back(f_ampl5.get());
 	}
-	std::cout << std::endl;
+	catch(std::string e)
+	{
+		std::cout << e;
+	}
 }
+
 
 
 int main(int argc, char* argv[])
 {
-	std::string FILE = "C:\Users\stam1989\source\repos\AdventOfCode\resources\Day7.txt";
+	std::string FILE = "../resources/Day7.txt";
 
 	std::vector<int> opcodes;
 
 	InitializingMemory(FILE, opcodes);
-	Operation(opcodes);
+	
+	std::array<int, 5> settings{{0, 1, 2, 3, 4}};
+	std::vector<int> res;
+	do
+    {
+		StartAmplifiers(settings, opcodes, res);
+	}
+	while ( std::next_permutation(settings.begin(), settings.end()) );
+	
+	std::sort(res.begin(), res.end());
+	std::cout << "Result is: " << res.back() <<std::endl;
 	//    PrintOpcodes(opcodes);
 
 	return 0;
