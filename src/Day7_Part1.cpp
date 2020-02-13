@@ -15,6 +15,7 @@
 #include <array>
 #include <future>
 #include <exception>
+#include <sstream>
 
 
 enum OpCode
@@ -75,15 +76,17 @@ int Operation(std::vector<int> opcodes, std::future<int>& f_input, int phase_set
 	int res;
     int op_in_counter = 0;
 // 	std::cout << "\nOperation!!\n";
-	int i = 0;
-	while (i < opcodes.size())
+	int ip = 0;
+	while (ip < opcodes.size())
 	{
-		int opcode = opcodes[i];
-		int temp;
-		std::vector<int> param_modes;
+		int opcode = opcodes[ip];
+//         std::thread::id this_id = std::this_thread::get_id();
+//         std::cout << "THREAD ID: " << this_id << ", Setting: " << phase_setting << ", Opcode: " << opcode << std::endl;
 
-		opcode = opcodes[i] % 100;
-		temp = opcodes[i] / 100;
+        int temp;
+		std::vector<int> param_modes;
+		opcode = opcodes[ip] % 100;
+		temp = opcodes[ip] / 100;
 
 		while (temp)
 		{
@@ -97,90 +100,90 @@ int Operation(std::vector<int> opcodes, std::future<int>& f_input, int phase_set
 		case OpCode::OP_ADD:
 		{
 			int arg1, arg2;
-			arg1 = (param_modes[0] == 0) ? opcodes[opcodes[i + 1]] : opcodes[i + 1];
-			arg2 = (param_modes[1] == 0) ? opcodes[opcodes[i + 2]] : opcodes[i + 2];
-			opcodes[opcodes[i + 3]] = arg1 + arg2;
-			i += 4;
+			arg1 = (param_modes[0] == 0) ? opcodes[opcodes[ip + 1]] : opcodes[ip + 1];
+			arg2 = (param_modes[1] == 0) ? opcodes[opcodes[ip + 2]] : opcodes[ip + 2];
+			opcodes[opcodes[ip + 3]] = arg1 + arg2;
+			ip += 4;
 			break;
 		}
 		case OpCode::OP_MUL:
 		{
 			int arg1, arg2;
-			arg1 = (param_modes[0] == 0) ? opcodes[opcodes[i + 1]] : opcodes[i + 1];
-			arg2 = (param_modes[1] == 0) ? opcodes[opcodes[i + 2]] : opcodes[i + 2];
-			opcodes[opcodes[i + 3]] = arg1 * arg2;
-			i += 4;
+			arg1 = (param_modes[0] == 0) ? opcodes[opcodes[ip + 1]] : opcodes[ip + 1];
+			arg2 = (param_modes[1] == 0) ? opcodes[opcodes[ip + 2]] : opcodes[ip + 2];
+			opcodes[opcodes[ip + 3]] = arg1 * arg2;
+			ip += 4;
 			break;
 		}
 		case OpCode::OP_IN:
 		{
             if(op_in_counter == 0)
             {
-                opcodes[opcodes[i + 1]] = phase_setting;
+                opcodes[opcodes[ip + 1]] = phase_setting;
             }
             else
             {
                 int input = f_input.get();
-                opcodes[opcodes[i + 1]] = input;
+                opcodes[opcodes[ip + 1]] = input;
             }
 
-			i += 2;
+			ip += 2;
             ++op_in_counter;
 			break;
 		}
 		case OpCode::OP_OUT:
 		{
-// 			std::cout << "Position " << opcodes[i + 1] << ", num: " << opcodes[opcodes[i + 1]] << std::endl;
-			res = opcodes[opcodes[i + 1]];
-			i += 2;
+// 			std::cout << "Position " << opcodes[ip + 1] << ", num: " << opcodes[opcodes[ip + 1]] << std::endl;
+			res = opcodes[opcodes[ip + 1]];
+			ip += 2;
 			break;
 		}
 		case OpCode::OP_JUMP_IF_TRUE:
 		{
 			int arg1, arg2;
-			arg1 = (param_modes[0] == 0) ? opcodes[opcodes[i + 1]] : opcodes[i + 1];
-			arg2 = (param_modes[1] == 0) ? opcodes[opcodes[i + 2]] : opcodes[i + 2];
+			arg1 = (param_modes[0] == 0) ? opcodes[opcodes[ip + 1]] : opcodes[ip + 1];
+			arg2 = (param_modes[1] == 0) ? opcodes[opcodes[ip + 2]] : opcodes[ip + 2];
 			if (arg1 != 0)
 			{
-				opcodes[i] = arg2;
+				ip = arg2;
 				break;
 			}
-			i += 3;
+			ip += 3;
 			break;
 		}
 		case OpCode::OP_JUMP_IF_FALSE:
 		{
 			int arg1, arg2;
-			arg1 = (param_modes[0] == 0) ? opcodes[opcodes[i + 1]] : opcodes[i + 1];
-			arg2 = (param_modes[1] == 0) ? opcodes[opcodes[i + 2]] : opcodes[i + 2];
+			arg1 = (param_modes[0] == 0) ? opcodes[opcodes[ip + 1]] : opcodes[ip + 1];
+			arg2 = (param_modes[1] == 0) ? opcodes[opcodes[ip + 2]] : opcodes[ip + 2];
 			if (arg1 == 0)
 			{
-				opcodes[i] = arg2;
+				ip = arg2;
 				break;
 			}
-			i += 3;
+			ip += 3;
 			break;
 		}
 		case OpCode::OP_LESS_THAN:
 		{
 			int arg1, arg2;
-			arg1 = (param_modes[0] == 0) ? opcodes[opcodes[i + 1]] : opcodes[i + 1];
-			arg2 = (param_modes[1] == 0) ? opcodes[opcodes[i + 2]] : opcodes[i + 2];
+			arg1 = (param_modes[0] == 0) ? opcodes[opcodes[ip + 1]] : opcodes[ip + 1];
+			arg2 = (param_modes[1] == 0) ? opcodes[opcodes[ip + 2]] : opcodes[ip + 2];
 
-			opcodes[opcodes[i + 3]] = (arg1 < arg2) ? 1 : 0;
+			opcodes[opcodes[ip + 3]] = (arg1 < arg2) ? 1 : 0;
 
-			i += 4;
+			ip += 4;
 			break;
 		}
 		case OpCode::OP_EQUALS:
 		{
 			int arg1, arg2;
-			arg1 = (param_modes[0] == 0) ? opcodes[opcodes[i + 1]] : opcodes[i + 1];
-			arg2 = (param_modes[1] == 0) ? opcodes[opcodes[i + 2]] : opcodes[i + 2];
+			arg1 = (param_modes[0] == 0) ? opcodes[opcodes[ip + 1]] : opcodes[ip + 1];
+			arg2 = (param_modes[1] == 0) ? opcodes[opcodes[ip + 2]] : opcodes[ip + 2];
 
-			opcodes[opcodes[i + 3]] = (arg1 == arg2) ? 1 : 0;
+			opcodes[opcodes[ip + 3]] = (arg1 == arg2) ? 1 : 0;
 
-			i += 4;
+			ip += 4;
 			break;
 		}
 		case OpCode::OP_TERMINATE:
@@ -190,7 +193,11 @@ int Operation(std::vector<int> opcodes, std::future<int>& f_input, int phase_set
 		}
 		default:
 		{
-			throw std::runtime_error("wrong opcode!!!!\n");
+            std::stringstream ss;
+            ss << "wrong opcode!!!!\n ";
+            ss << "OPCODE: " << opcode << "\n";
+            ss << "Program counter: " << ip << "\n";
+			throw std::runtime_error(ss.str());
 		}
 		}
 	}
@@ -209,8 +216,8 @@ int Operation(std::vector<int> opcodes, std::future<int>& f_input, int phase_set
 
 void StartAmplifiers(std::array<int, 5>& settings, std::vector<int>& opcodes, std::vector<int>& res)
 {
-	std::cout << "Phase Settings: " << settings[0] << ", " << settings[1] << ", " << settings[2] << ", " << settings[3] << ", "
-	<< settings[4] << std::endl;
+// 	std::cout << "Phase Settings: " << settings[0] << ", " << settings[1] << ", " << settings[2] << ", " << settings[3] << ", "
+// 	<< settings[4] << std::endl;
 
 	try
 	{
@@ -240,8 +247,6 @@ void StartAmplifiers(std::array<int, 5>& settings, std::vector<int>& opcodes, st
         p_amp5.set_value(f_ampl4.get());
 
 		res.emplace_back(f_ampl5.get());
-
-		std::cout << "Current res: " << res.back() << std::endl;
 	}
 	catch(std::string e)
 	{
@@ -268,7 +273,7 @@ int main(int argc, char* argv[])
 	while ( std::next_permutation(settings.begin(), settings.end()) );
 	
 	std::sort(res.begin(), res.end());
-	std::cout << "\nResult is: " << res.back() <<std::endl;
+	std::cout << "Result is: " << res.back() <<std::endl;
 	//    PrintOpcodes(opcodes);
 
 	return 0;
