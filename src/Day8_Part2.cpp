@@ -82,7 +82,7 @@ int CountZeros(Layers &layers)
     return res;
 }
 
-void DecodeLayers(Layers layers, std::string decoded_image)
+void DecodeLayers(Layers layers, std::string& decoded_image)
 {
     for (auto &layer : layers)
     {
@@ -95,6 +95,18 @@ void DecodeLayers(Layers layers, std::string decoded_image)
             }
             ++pos;
         }
+    }
+}
+
+void PrintImage(std::string &decoded_image)
+{
+    int counter = 1;
+    for (auto c : decoded_image)
+    {
+        std::cout << ((c == '0')? "  ": ((c == '1')? "##": "??"));
+        if (counter % 25 == 0)
+        {std::cout << std::endl;}
+        counter++;
     }
 }
 
@@ -112,10 +124,9 @@ int main()
 
     std::string decoded_image(WIDE * TALL, '2');
     DecodeLayers(layers, decoded_image);
+    PrintImage(decoded_image);
 
-    std::cout << decoded_image << std::endl;
-//     int res =  CountZeros(layers);
-//     std::cout << "Result is: " << res << std::endl;
+    std::cout << "Length: " << decoded_image.size() << std::endl;
 
     return 0;
 }
