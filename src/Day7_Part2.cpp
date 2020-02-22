@@ -25,6 +25,9 @@
 std::mutex mu;
 std::condition_variable cond_amp;
 
+
+static constexpr size_t AMPL_NUM = 5;
+
 enum OpCode
 {
 	OP_ADD = 1, // adds together numbers read from two positions and stores the result in a third position
@@ -237,24 +240,22 @@ void Operation(std::vector<int> opcodes, std::map<int, int>&  thread_data, int p
 
 void StartAmplifiers(std::array<int, 5>& settings, std::vector<int>& opcodes, std::vector<int>& results)
 {
-	// 	std::cout << "Phase Settings: " << settings[0] << ", " << settings[1] << ", " << settings[2] << ", " << settings[3] << ", "
-	// 	<< settings[4] << std::endl;
 	int res;
 	try
 	{
 		std::map<int, int> thread_data;  // a map from amplifier id to its data
 		thread_data[0] = 0;
-		std::thread t1(Operation, opcodes, std::ref(thread_data), settings[0], 0, std::ref(res));
-		std::thread t2(Operation, opcodes, std::ref(thread_data), settings[1], 1, std::ref(res));
-		std::thread t3(Operation, opcodes, std::ref(thread_data), settings[2], 2, std::ref(res));
-		std::thread t4(Operation, opcodes, std::ref(thread_data), settings[3], 3, std::ref(res));
-		std::thread t5(Operation, opcodes, std::ref(thread_data), settings[4], 4, std::ref(res));
+		std::array<std::thread, 5> amplifiers;
+		for (int i = 0; i < AMPL_NUM; i++)
+		{
+			std::thread t(Operation, opcodes, std::ref(thread_data), settings[i], i, std::ref(res));
+			amplifiers.at(i) = std::move(t);
+		}
 		
-		t1.join();
-		t2.join();
-		t3.join();
-		t4.join();
-		t5.join();
+		for (int i = 0; i < AMPL_NUM; i++)
+		{
+			amplifiers.at(i).join();
+		}
 	}
 	catch(std::string e)
 	{

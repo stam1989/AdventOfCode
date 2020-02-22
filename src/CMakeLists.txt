@@ -14,6 +14,7 @@ install(FILES
 		"${PROJECT_BINARY_DIR}/../src/Day7_Part2.cpp"
 		"${PROJECT_BINARY_DIR}/../src/Day8_Part1.cpp"
 		"${PROJECT_BINARY_DIR}/../src/Day8_Part2.cpp"
+		"${PROJECT_BINARY_DIR}/../src/Day9_Part1.cpp"
   DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/src
   )
 
@@ -34,6 +35,7 @@ add_executable(Day7_Part1 Day7_Part1.cpp)
 add_executable(Day7_Part2 Day7_Part2.cpp)
 add_executable(Day8_Part1 Day8_Part1.cpp)
 add_executable(Day8_Part2 Day8_Part2.cpp)
+add_executable(Day9_Part1 Day9_Part1.cpp)
 
 install(TARGETS Day1_Part1
 				Day1_Part2
@@ -49,6 +51,7 @@ install(TARGETS Day1_Part1
 				Day7_Part2
 				Day8_Part1
 				Day8_Part2
+				Day9_Part1
 		RUNTIME DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/install/bin)
 
 		
