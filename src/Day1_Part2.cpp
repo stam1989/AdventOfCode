@@ -1,10 +1,11 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <math.h>
 
 int Calc(int mass)
 {
-	int temp = std::floor(mass / 3) - 2;
+	int temp = floor(mass / 3) - 2;
 	if (temp < 1)
 	{
 		return 0;
@@ -29,7 +30,7 @@ void PrintResult(int& res)
 
 int main(int argc, char* argv[]) {
 
-	std::string FILE = "C:\Users\stam1989\source\repos\AdventOfCode\resources\Day1.txt";
+    std::string FILE = "resources/Day1.txt";
 
 	std::ifstream input(FILE);
 	std::string line_input;

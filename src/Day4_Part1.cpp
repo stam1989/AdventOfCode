@@ -6,6 +6,7 @@
 #include <sstream>
 #include <map>
 #include <array>
+#include <algorithm>
 
 void CreatePswds(std::vector<int>& range, std::vector<std::string>& pswds)
 {
@@ -87,7 +88,7 @@ void PrintPswds(std::vector<std::string> pswds)
 
 int main(int argc, char* argv[])
 {
-	std::string FILE = "C:\Users\stam1989\source\repos\AdventOfCode\resources\Day4.txt";
+    std::string FILE = "resources/Day4.txt";
 
 	std::ifstream input(FILE);
 	std::vector<int> range;

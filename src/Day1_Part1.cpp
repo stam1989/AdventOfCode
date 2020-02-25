@@ -1,12 +1,13 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <math.h>
 
 using namespace std;
 
 void AddMass(int& res, int mass)
 {
-	res += std::floor(mass / 3) -2;
+	res += floor(mass / 3) -2;
 }
 
 void PrintResult(int& res)
@@ -16,7 +17,7 @@ void PrintResult(int& res)
 
 int main() {
 
-	std::string FILE = "C:\Users\stam1989\source\repos\AdventOfCode\resources\Day1.txt";
+    std::string FILE = "resources/Day1.txt";
 
 	std::ifstream input(FILE);
 	std::string line_input;
