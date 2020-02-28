@@ -53,39 +53,15 @@ void ReadFile(Coords& coords)
 	}
 }
 
-
-
-
-Coords drawline(int x0, int y0, int x1, int y1)
+bool IfBlocked(std::pair<int, int> possible_station, std::pair<int, int> asteroid1, std::pair<int, int> asteroid2)
 {
-	int dx, dy, p, x, y;
-	
-	dx=x1-x0;
-	dy=y1-y0;
-	
-	x=x0;
-	y=y0;
-	
-	p=2*dy-dx;
-	
-	Coords line_coords;
-	
-	while(x<x1)
-	{
-		if(p>=0)
-		{
-			line_coords.emplace_back(x, y);
-			y=y+1;
-			p=p+2*dy-2*dx;
-		}
-		else
-		{
-			line_coords.emplace_back(x, y);
-			p=p+2*dy;
-		}
-		x=x+1;
-	}
-	return line_coords;
+
+}
+
+
+std::pair<int, int> FindStation(Coords coords)
+{
+
 }
 
 
@@ -105,9 +81,6 @@ int main()
 	ReadFile(coords);
 	
 	PrintCoords(coords);
-	std::cout << "\n\nline between: " << "(" << coords[0].first << ", " << coords[0].second << "), and: " << "(" << coords[8].first << ", " << coords[8].second << ")\n";
-	line_coords = drawline(coords[0].first, coords[0].second, coords[8].first, coords[8].second);
-	PrintCoords(line_coords);
 	
 	
 	return 0;
