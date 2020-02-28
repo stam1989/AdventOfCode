@@ -53,15 +53,36 @@ void ReadFile(Coords& coords)
 	}
 }
 
-bool IfBlocked(std::pair<int, int> possible_station, std::pair<int, int> asteroid1, std::pair<int, int> asteroid2)
+bool IfBlocked(std::pair<int, int>& possible_station, std::pair<int, int>& point_to_check, Coords& Coords)
 {
-
+    if()
 }
 
+int GetNumber(std::pair<int, int>& possible_station, Coords& coords)
+{
+    Coords asteroids_detected;
+    for (auto &point : coords)
+    {
+        if (point == possible_station)
+        {
+            continue;
+        }
+
+        if (!IfBlocked(possible_station, point, asteroids_detected)
+        {
+            asteroids_detected.emplace_back(point);
+        }
+    }
+    return asteroid_detected.size();
+}
 
 std::pair<int, int> FindStation(Coords coords)
 {
-
+    std::vector<int> asteroid_num;
+    for(auto &possible_station : coords)
+    {
+        asteroid_num.emplace_back(GetNumber(possible_station, coords));
+    }
 }
 
 
