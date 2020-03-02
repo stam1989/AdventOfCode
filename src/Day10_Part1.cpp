@@ -13,9 +13,31 @@
 #include <algorithm>
 #include <math.h>
 
-using Coords = std::vector<std::pair<int, int>>;
 
 static constexpr char FILENAME[] = "../../../resources/Day10.txt";
+
+struct Point
+{
+	Point(int x, int y) : x(x), y(y) {}
+	Point(int x, int y, long a) : x(x), y(y), angle(a) {}
+	
+	bool operator <(Point& p)
+	{
+		return angle < p.angle;
+	}
+	
+	bool operator ==(Point& p)
+	{
+		return x == p.x && y == p.y;
+	}
+	
+	int x, y;
+	long angle;
+};
+
+
+using Coords = std::vector<Point>;
+
 
 
 void ReadFile(Coords& coords)
@@ -34,7 +56,7 @@ void ReadFile(Coords& coords)
 				{
 					if(ch == '#')
 					{
-						coords.emplace_back(std::make_pair(x, y));
+						coords.emplace_back(Point(x, y));
 					}
 					x++;
 				}
@@ -56,11 +78,12 @@ void ReadFile(Coords& coords)
 }
 
 
-int GetNumber(std::pair<int, int>& possible_station, Coords coords)
+
+Coords DetectAsteroids(Point& possible_station, Coords coords)
 {
-    Coords asteroids_detected;
-    for (auto i = 0; i < coords.size(); i++)
-    {		
+	Coords asteroids_detected;
+	for (auto i = 0; i < coords.size(); i++)
+	{		
 		if (coords[i] == possible_station)
 		{
 			continue;
@@ -75,12 +98,12 @@ int GetNumber(std::pair<int, int>& possible_station, Coords coords)
 		bool intersection_flag = false;
 		for (auto j = 0; j < asteroids_detected.size(); j++)
 		{
-			if(std::atan2(possible_station.first - asteroids_detected[j].first, possible_station.second - asteroids_detected[j].second) == 
-				std::atan2(possible_station.first - coords[i].first, possible_station.second - coords[i].second))
+			if(std::atan2(possible_station.x - asteroids_detected[j].x, possible_station.y - asteroids_detected[j].y) == 
+				std::atan2(possible_station.x - coords[i].x, possible_station.y - coords[i].y))
 			{
 				intersection_flag = true;
 				
-				if(abs(possible_station.second - asteroids_detected[j].second) < abs(possible_station.second - coords[i].second))
+				if(abs(possible_station.y - asteroids_detected[j].y) > abs(possible_station.y - coords[i].y))
 				{
 					std::swap(asteroids_detected[j], coords[i]);
 				}
@@ -93,13 +116,17 @@ int GetNumber(std::pair<int, int>& possible_station, Coords coords)
 		{
 			asteroids_detected.emplace_back(coords[i]);
 		}
-		
-    }
-    return asteroids_detected.size();
+	}
+	return asteroids_detected;
+}
+
+int GetNumber(Point& possible_station, Coords coords)
+{
+	return DetectAsteroids(possible_station, coords).size();
 }
 
 
-void FindStation(Coords coords)
+Point FindStation(Coords coords)
 {
     std::vector<int> asteroid_num;
     for(auto &possible_station : coords)
@@ -110,24 +137,21 @@ void FindStation(Coords coords)
     auto max_ast_pos = std::max_element(asteroid_num.begin(), asteroid_num.end());
 	int pos = std::distance(asteroid_num.begin(), max_ast_pos);
 	
-	std::cout << "The station should be built in: (" << coords[pos].first << " ," << coords[pos].second << ") with " << *max_ast_pos << " asteroids detected!\n";
+	std::cout << "The station should be built in: (" << coords[pos].x << " ," << coords[pos].y << ") with " << *max_ast_pos << " asteroids detected!\n";
+	
+	return coords[pos];
 }
 
-struct Point
-{
-	int x, y, slope, position
-}
 
-void VaporizeAsteroid(Coords coords, std::pair<int, int> station)
+void VaporizeAsteroid(Point station, Coords coords)
 {
-	std::vector<std::pair<int, int>> slopes;   // vector of pairs of sloped and point's position in coords
-	for (auto i = 0; i < coords.size(); i++)
+	Coords asteroids_detected = DetectAsteroids(station, coords);
+	
+	std::sort(asteroids_detected.begin(), asteroids_detected.end());
+	
+	for (auto ast : asteroids_detected)
 	{
-		if (coords[i] == station)
-		{
-			continue;
-		}
-		slope.emplace_back(std::atan2(), i);
+		std::cout << "(" << ast.x << ", " << ast.y << "): " << std::atan2(station.x -ast.x, station.y - ast.y) << std::endl;
 	}
 }
 
@@ -136,7 +160,7 @@ void PrintCoords(Coords& coords)
 {
 	for (auto& point : coords)
 	{
-		std::cout << "(" << point.first << ", " << point.second << "), ";
+		std::cout << "(" << point.x << ", " << point.y << "), ";
 	}
 	std::cout << std::endl;
 }
@@ -147,9 +171,10 @@ int main()
 	Coords coords, line_coords;
 	ReadFile(coords);
 	
-	PrintCoords(coords);
-	FindStation(coords);
+// 	PrintCoords(coords);
+	Point station = FindStation(coords);
 	
+	VaporizeAsteroid(station, coords);
 // 	std::cout << std::atan2(0, 1) << ", " << std::atan2(1,0) << std::endl;
 	
 	return 0;
