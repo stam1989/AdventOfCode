@@ -151,72 +151,113 @@ Point FindStation(Coords coords)
 }
 
 
-bool compareByAngle(const Point& p1, const Point& p2)
+void PrintCoords(Coords& coords)
 {
-    if (p1.angle >= 0 && p2.angle < 0)
-        return p1.angle;
-    else if (p1.angle < 0 && p2.angle >= 0)
-        return p2.angle;
-    else if (p1.angle >= 0 && p2.angle >= 0)
-        return p1.angle < p2.angle;
-    else
-        return p2.angle < p1.angle;
+	for (auto& point : coords)
+	{
+		std::cout << "(" << point.x << ", " << point.y << "): " << point.angle << std::endl;
+	}
+	std::cout << std::endl;
 }
+
+
+void ReplaceOrRemove(Coords& coords, Coords& asteroids, Point& station, int pos)
+{
+	std::cout << "ast to be rem: (" << asteroids[pos].x << ", " << asteroids[pos].y << ")\n"; 
+	bool flag;
+	
+	Coords temp_point;
+	
+	coords.erase(std::remove_if(coords.begin(), coords.end(), [&](Point& p) { return p == asteroids[pos]; }), coords.end());
+	
+	auto iter = std::find_if(coords.begin(), coords.end(), [&](const Point& p) { return asteroids[pos].angle == p.angle; });
+	
+	if (iter == coords.end())
+	{
+// 		std::cout << "Not replaced! \n\n\n";
+		asteroids.erase(std::remove_if(asteroids.begin(), asteroids.end(), [&](Point& p) { return p == asteroids[pos]; }), asteroids.end());
+		return;
+	}
+	
+	std::swap(asteroids[pos], *iter);
+	
+	while ((iter = std::find_if(iter, coords.end(), [&](const Point& p) { return asteroids[pos].angle == p.angle; })) != coords.end())
+	{
+		flag = true;
+		
+		if(abs(station.y - asteroids[pos].y) > abs(station.y - iter->y))
+		{
+			iter->angle = std::atan2(station.x - iter->x, station.y - iter->y);
+			std::swap(asteroids[pos], *iter);
+		}
+		else if(abs(station.x - asteroids[pos].x) > abs(station.x - iter->x))
+		{
+			iter->angle = std::atan2(station.x - iter->x, station.y - iter->y);
+			std::swap(asteroids[pos], *iter);
+		}
+		temp_point.emplace_back(*iter);
+		
+		iter++;
+	}
+}
+
 
 
 void VaporizeAsteroid(Point station, Coords coords, int vap_count)
 {
 	Coords asteroids_detected = PopulateAsteroidMap(station, coords);
 	
-    std::sort(asteroids_detected.begin(), asteroids_detected.end()/*, compareByAngle*/);
+//     std::sort(asteroids_detected.begin(), asteroids_detected.end());
 	
     Coords ast_neg, ast_pos;
 
 	for (auto ast : asteroids_detected)
 	{
-		std::cout << "(" << ast.x << ", " << ast.y << "): " << ast.angle << std::endl;
+// 		std::cout << "(" << ast.x << ", " << ast.y << "): " << ast.angle << std::endl;
         if (ast.angle > 0)
             ast_pos.emplace_back(ast);
         else
             ast_neg.emplace_back(ast);
 	}
 
+	PrintCoords(ast_pos);
+	PrintCoords(ast_neg);
+	
 	int count = 0;
+	
     while (count < vap_count)
     {
         for(int i = ast_neg.size(); i > 0; i--)
         {
+			std::sort(ast_neg.begin(), ast_neg.end());
             if (count == vap_count)
                 break;
 
-            ast_neg.erase(std::remove(ast_neg.begin(), ast_neg.end(), ast_neg[i]), ast_neg.end());
+//             ast_neg.erase(std::remove_if(ast_neg.begin(), ast_neg.end(), [&](Point& p) { return p == ast_neg[i]; }), ast_neg.end());
 
+			ReplaceOrRemove(coords, ast_neg, station, i);
+			
             count++;
         }
 
-        for(int i = 0; i < ast_pos.size(); i++)
+        for(int i = ast_pos.size(); i > 0; i--)
         {
+			std::sort(ast_pos.begin(), ast_pos.end());
             if (count == vap_count)
                 break;
 
-            ast_pos.erase(std::remove(ast_pos.begin(), ast_pos.end(), ast_pos[i]), ast_pos.end());
-
-
+// 			ast_pos.erase(std::remove_if(ast_pos.begin(), ast_pos.end(),[&](Point& p) { return p == ast_pos[i]; }), ast_pos.end());
+			
+			ReplaceOrRemove(coords, ast_pos, station, i);
+			
             count++;
         }
 
     }
 
-}
-
-
-void PrintCoords(Coords& coords)
-{
-	for (auto& point : coords)
-	{
-		std::cout << "(" << point.x << ", " << point.y << "), ";
-	}
-	std::cout << std::endl;
+    PrintCoords(ast_pos);
+	PrintCoords(ast_neg);
+    
 }
 
 
@@ -228,7 +269,7 @@ int main()
 // 	PrintCoords(coords);
 	Point station = FindStation(coords);
 	
-	VaporizeAsteroid(station, coords, 3);
+	VaporizeAsteroid(station, coords, 200);
 // 	std::cout << std::atan2(0, 1) << ", " << std::atan2(1,0) << std::endl;
 	
 	return 0;
