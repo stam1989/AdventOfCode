@@ -34,7 +34,6 @@ int main(int argc, char* argv[])
 	std::string s;
 	if (input.is_open())
 	{
-		auto i = 0;
 		while (std::getline(input, s))
 		{
 			orbits.emplace_back(std::make_pair(s.substr(4, 7), s.substr(0, 3)));
