@@ -43,7 +43,7 @@ void CopyResultIntoFile(std::vector<int>& opcodes)
 
 int main(int argc, char* argv[])
 {
-    std::string FILE = "resources/Day2_input.txt";
+    std::string FILE = "../../../resources/Day2_input.txt";
 
 	std::ifstream input(FILE);
 	std::string code;

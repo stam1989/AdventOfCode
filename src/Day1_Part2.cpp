@@ -30,7 +30,7 @@ void PrintResult(int& res)
 
 int main(int argc, char* argv[]) {
 
-    std::string FILE = "resources/Day1.txt";
+    std::string FILE = "../../../resources/Day1.txt";
 
 	std::ifstream input(FILE);
 	std::string line_input;
