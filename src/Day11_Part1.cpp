@@ -17,11 +17,13 @@
 #include <sstream>
 #include <map>
 #include <queue>
+#include <cstdint>
 
 
 static constexpr char FILENAME[] = "../../../resources/Day11.txt";
 static constexpr int row = 500;
 static constexpr int column = 500;
+
 
 enum OpCode
 {
@@ -40,13 +42,12 @@ enum OpCode
 /// 1 == immediate mode
 /// 0 == position mode
 
-void InitializingMemory(std::vector<long>& opcodes)
+void InitializingMemory(std::vector<int64_t>& opcodes)
 {
     opcodes.clear();
     std::ifstream input(FILENAME);
     std::string code;
-    try
-    {
+
         if (input.is_open())
         {
             while (std::getline(input, code, ','))
@@ -60,11 +61,6 @@ void InitializingMemory(std::vector<long>& opcodes)
             std::string exception_string =  "Could not open input file";
             throw std::runtime_error(exception_string);
         }
-    }
-    catch(std::string& exception_string)
-    {
-        std::cout << exception_string << std::endl;
-    }
 }
 
 void InitializePanel(std::string panel[][500])
@@ -87,7 +83,7 @@ void FillWithZeros(std::vector<int>& param_modes)
     }
 }
 
-void SetMode(std::vector<long>& opcodes, std::vector<int>& param_modes, long& opcode, int ip)
+void SetMode(std::vector<int64_t>& opcodes, std::vector<int>& param_modes, int64_t& opcode, int ip)
 {
     int temp;
     opcode = opcodes[ip] % 500;
@@ -100,7 +96,7 @@ void SetMode(std::vector<long>& opcodes, std::vector<int>& param_modes, long& op
     }
 }
 
-void SetArgs(long &arg1, long& arg2, std::vector<long> &opcodes, int& ip, std::vector<int>& param_modes, int& relative_base)
+void SetArgs(long &arg1, long& arg2, std::vector<int64_t> &opcodes, int& ip, std::vector<int>& param_modes, int& relative_base)
 {
 
     arg1 = (param_modes[0] == 0) ? opcodes[opcodes[ip + 1]] :
@@ -224,13 +220,13 @@ void PaintAndMoveRobot(HullRobot& robot, std::string panel[][500], std::queue<lo
 }
 
 
-void Operation(std::vector<long> opcodes, std::queue<long>& output, HullRobot& robot, std::string panel[][500], int& res)
+void Operation(std::vector<int64_t> opcodes, std::queue<long>& output, HullRobot& robot, std::string panel[][500], int& res)
 {
     int op_in_counter = 0, ip = 0, relative_base = 0;
     bool cont = true;
     while (ip < opcodes.size() && cont)
     {
-        long opcode = opcodes[ip];
+        int64_t opcode = opcodes[ip];
         std::vector<int> param_modes;
         SetMode(opcodes, param_modes, opcode, ip);
         FillWithZeros(param_modes);
@@ -371,18 +367,20 @@ void Operation(std::vector<long> opcodes, std::queue<long>& output, HullRobot& r
     }
 }
 
-void PrintOpcodes(std::vector<long>& opcodes)
+void PrintOpcodes(std::vector<int64_t>& opcodes)
 {
+    std::cout << "PrintOpcodes starts \n";
     for (auto& opcode : opcodes)
     {
         std::cout << opcode << ",";
     }
-    std::cout << std::endl;
+    std::cout << "PrintOpcodes finished \n\n";
 }
 
 void PrintPanel(std::string panel[][500])
 {
-    std::cout << "\n\n\n";
+    std::cout << "PrintPanel starts \n";
+
     for (int x = 0; x < column; x++)
     {
         for  (int y = 0; y < row; y++)
@@ -391,37 +389,48 @@ void PrintPanel(std::string panel[][500])
         }
         std::cout << std::endl;
     }
+
+    std::cout << "PrintPanel finished \n";
 }
 
 int main(int argc, char* argv[])
 {
-    std::cout << "opcodes\n\n";
-    std::vector<long> opcodes(344633390, 0);
+    
 
-    std::cout << "output\n\n";
+    std::vector<int64_t> opcodes(34463339, 0);  // initialize the opcode vector with zeros
     std::queue<long> output;
 
-    std::cout << "InitializingMemory\n\n";
-    InitializingMemory(opcodes);
-//     PrintOpcodes(opcodes);
 
-    std::cout << "panel\n\n";
-    std::string panel[column][row];
+    try
+    {
+       
+        std::cout << "InitializingMemory\n\n";
+        InitializingMemory(opcodes);
+        PrintOpcodes(opcodes);
 
-    std::cout << "InitializePanel\n\n";
-    InitializePanel(panel);
+        //std::string panel[column][row];
+        //PrintPanel(panel);
+        //InitializePanel(panel);
+        //PrintPanel(panel);
+        //HullRobot robot;
 
-    int res = 0;
-    std::cout << "asdsasd\n\n";
-//     PrintPanel(panel);
-    HullRobot robot;
+        //auto color = (panel[robot.x][robot.y] == ".") ? 0 : 1;
+        //output.emplace(color);
+        //std::cout << output.front() << std::endl;
+        //int res = 0;
+        //Operation(opcodes, output, robot, panel, res);
 
-    auto color = (panel[robot.x][robot.y] == ".") ? 0 : 1;
-    output.emplace(color);
-    std::cout << output.front() << std::endl;
-    Operation(opcodes, output, robot, panel, res);
-
-    std::cout << "Result is: " << res;
+        //std::cout << "Result is: " << res;
+    }
+    catch (std::string& exception_string)
+    {
+        std::cout << exception_string << std::endl;
+    }
+    catch (std::exception& e)
+    {
+        std::cout << e.what() << std::endl;
+    }
+    
 
     return 0;
 }
