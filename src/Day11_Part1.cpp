@@ -21,8 +21,8 @@
 
 
 static constexpr char FILENAME[] = "../../../resources/Day11.txt";
-static constexpr int row = 500;
-static constexpr int column = 500;
+static constexpr int row = 190;
+static constexpr int column = 190;
 
 
 enum OpCode
@@ -44,6 +44,8 @@ enum OpCode
 
 void InitializingMemory(std::vector<int64_t>& opcodes)
 {
+    std::cout << "InitializingMemory starts\n";
+
     opcodes.clear();
     std::ifstream input(FILENAME);
     std::string code;
@@ -52,7 +54,7 @@ void InitializingMemory(std::vector<int64_t>& opcodes)
         {
             while (std::getline(input, code, ','))
             {
-                opcodes.push_back(stol(code, nullptr, 10));
+                opcodes.push_back(stoll(code, nullptr, 10));
             }
             input.close();
         }
@@ -61,9 +63,11 @@ void InitializingMemory(std::vector<int64_t>& opcodes)
             std::string exception_string =  "Could not open input file";
             throw std::runtime_error(exception_string);
         }
+
+        std::cout << "InitializingMemory finished\n";
 }
 
-void InitializePanel(std::string panel[][500])
+void InitializePanel(std::string panel[][row])
 {
     for (int x = 0; x < column; x++)
     {
@@ -85,9 +89,10 @@ void FillWithZeros(std::vector<int>& param_modes)
 
 void SetMode(std::vector<int64_t>& opcodes, std::vector<int>& param_modes, int64_t& opcode, int ip)
 {
+    param_modes.clear();
     int temp;
-    opcode = opcodes[ip] % 500;
-    temp = opcodes[ip] / 500;
+    opcode = opcodes[ip] % 100;
+    temp = opcodes[ip] / 100;
 
     while (temp)
     {
@@ -98,16 +103,11 @@ void SetMode(std::vector<int64_t>& opcodes, std::vector<int>& param_modes, int64
 
 void SetArgs(long &arg1, long& arg2, std::vector<int64_t> &opcodes, int& ip, std::vector<int>& param_modes, int& relative_base)
 {
-
     arg1 = (param_modes[0] == 0) ? opcodes[opcodes[ip + 1]] :
     ((param_modes[0] == 1) ? opcodes[ip + 1] : opcodes[opcodes[ip + 1] + relative_base]);
 
     arg2 = (param_modes[1] == 0) ? opcodes[opcodes[ip + 2]] :
     ((param_modes[1] == 1) ? opcodes[ip + 2] : opcodes[opcodes[ip + 2] + relative_base]);
-
-    // 	std::cout << "arg1: " << arg1 << std::endl;
-
-    // 	std::cout << "SetArgs:: arg1: " << arg1 << ", arg2: " << arg2<< ", relative base: " << relative_base << std::endl;
 }
 
 
@@ -140,7 +140,7 @@ enum Direction
     MOVE_RIGHT       // 90 degrees right
 };
 
-void PaintAndMoveRobot(HullRobot& robot, std::string panel[][500], std::queue<long>& output)
+void PaintAndMoveRobot(HullRobot& robot, std::string panel[][row], std::queue<uint8_t>& output)
 {
     panel[robot.x][robot.y] = (output.front() == 0) ? "." : "#";
     output.pop();
@@ -220,17 +220,17 @@ void PaintAndMoveRobot(HullRobot& robot, std::string panel[][500], std::queue<lo
 }
 
 
-void Operation(std::vector<int64_t> opcodes, std::queue<long>& output, HullRobot& robot, std::string panel[][500], int& res)
+void Operation(std::vector<int64_t> opcodes, std::queue<uint8_t>& output, HullRobot& robot, std::string panel[][row], int& res)
 {
-    int op_in_counter = 0, ip = 0, relative_base = 0;
+    int ip = 0, relative_base = 0;
     bool cont = true;
+    std::vector<int> param_modes;
     while (ip < opcodes.size() && cont)
     {
         int64_t opcode = opcodes[ip];
-        std::vector<int> param_modes;
         SetMode(opcodes, param_modes, opcode, ip);
         FillWithZeros(param_modes);
-        // 		std::cout << "opcode: " << opcode << std::endl;
+
         switch (opcode)
         {
             case OpCode::OP_ADD:
@@ -242,7 +242,6 @@ void Operation(std::vector<int64_t> opcodes, std::queue<long>& output, HullRobot
 
 
                 opcodes[pos] = arg1 + arg2;
-                // 				std::cout << "OP_ADD:: Opcode: " << opcode << ", opcodes[opcodes[ip + 3]]: " << opcodes[opcodes[ip + 3]] << ", arg1:" << arg1 << ", arg2: " << arg2 << ", pos: " << pos << std::endl;
                 ip += 4;
                 break;
             }
@@ -254,7 +253,6 @@ void Operation(std::vector<int64_t> opcodes, std::queue<long>& output, HullRobot
                 pos = (param_modes[2] == 0) ? opcodes[ip + 3] : ((param_modes[2] == 1) ? (ip + 3) : opcodes[ip + 3] + relative_base);
 
                 opcodes[pos] = arg1 * arg2;
-                // 				std::cout << "OP_MUL:: para modes: " << param_modes.size() << ", Opcode: " << opcode << ", opcodes[opcodes[ip + 3]]: " << opcodes[pos] << ", arg1:" << arg1 << ", arg2: " << arg2 << ", pos: " << pos << std::endl;
 
                 ip += 4;
                 break;
@@ -268,6 +266,7 @@ void Operation(std::vector<int64_t> opcodes, std::queue<long>& output, HullRobot
                 {
                     throw std::range_error("Empty output queue!");
                 }
+
                 opcodes[pos] = output.front();
                 output.pop();
                 ip += 2;
@@ -281,12 +280,13 @@ void Operation(std::vector<int64_t> opcodes, std::queue<long>& output, HullRobot
                 int pos = (param_modes[0] == 0) ? opcodes[ip + 1] : ((param_modes[0] == 1) ? (ip + 1) : relative_base + opcodes[ip + 1]);
 
                 output.emplace(arg1);
-//                 std::cout << "OP_OUT:: Position " << pos << ", num: " << arg1 << std::endl;
+
                 if (output.size() == 2)
                 {
                     res++;
                     PaintAndMoveRobot(robot, panel, output);
                 }
+
                 ip += 2;
                 break;
             }
@@ -294,7 +294,7 @@ void Operation(std::vector<int64_t> opcodes, std::queue<long>& output, HullRobot
             {
                 long arg1, arg2;
                 SetArgs(arg1, arg2, opcodes, ip, param_modes, relative_base);
-                // 				std::cout << "OP_JUMP_IF_TRUE:: Opcode: " << opcode << ", param[0]" << param_modes[0] << ", arg1:" << arg1 << ", arg2: " << arg2 << std::endl;
+
                 if (arg1 != 0)
                 {
                     ip = arg2;
@@ -313,7 +313,7 @@ void Operation(std::vector<int64_t> opcodes, std::queue<long>& output, HullRobot
                     ip = arg2;
                     break;
                 }
-                // 				std::cout << "OP_JUMP_IF_FALSE:: Opcode: " << opcode  << ", arg1:" << arg1 << ", arg2: " << arg2 << std::endl;
+
                 ip += 3;
                 break;
             }
@@ -323,7 +323,6 @@ void Operation(std::vector<int64_t> opcodes, std::queue<long>& output, HullRobot
                 SetArgs(arg1, arg2, opcodes, ip, param_modes, relative_base);
                 pos = (param_modes[2] == 0) ? opcodes[ip + 3] : ((param_modes[2] == 1) ? ip + 3 : opcodes[ip + 3] + relative_base);
 
-                // 				std::cout << "OP_LESS_THAN:: pos: " << pos << ", arg1:" << arg1 << ", arg2: " << arg2 << std::endl;
                 opcodes[pos] = (arg1 < arg2) ? 1 : 0;
                 ip += 4;
                 break;
@@ -335,7 +334,6 @@ void Operation(std::vector<int64_t> opcodes, std::queue<long>& output, HullRobot
                 pos = (param_modes[2] == 0) ? opcodes[ip + 3] : ((param_modes[2] == 1) ? ip + 3 : opcodes[ip + 3] + relative_base);
 
                 opcodes[pos] = (arg1 == arg2) ? 1 : 0;
-                // 				std::cout << "OP_EQUALS:: Opcode: " << opcode<< ", pos: " << pos   << ", arg1:" << arg1 << ", arg2: " << arg2 << std::endl;
                 ip += 4;
                 break;
             }
@@ -345,13 +343,11 @@ void Operation(std::vector<int64_t> opcodes, std::queue<long>& output, HullRobot
 
                 relative_base += arg1;
 
-                // 				std::cout << "OP_REL_MODE:: Opcode: " << opcode  << ", arg1:" << arg1 << ", relative_base: " << relative_base << std::endl;
                 ip += 2;
                 break;
             }
             case OpCode::OP_TERMINATE:
             {
-                // 			std::cout << "Terminate!!\n";
                 cont = false;
                 break;
             }
@@ -377,7 +373,7 @@ void PrintOpcodes(std::vector<int64_t>& opcodes)
     std::cout << "PrintOpcodes finished \n\n";
 }
 
-void PrintPanel(std::string panel[][500])
+void PrintPanel(std::string panel[][row])
 {
     std::cout << "PrintPanel starts \n";
 
@@ -395,32 +391,27 @@ void PrintPanel(std::string panel[][500])
 
 int main(int argc, char* argv[])
 {
-    
-
-    std::vector<int64_t> opcodes(34463339, 0);  // initialize the opcode vector with zeros
-    std::queue<long> output;
-
-
     try
     {
-       
-        std::cout << "InitializingMemory\n\n";
+        std::vector<int64_t> opcodes(34463339, 0);  // initialize the opcode vector with zeros
+        std::queue<uint8_t> output;
+
         InitializingMemory(opcodes);
-        PrintOpcodes(opcodes);
+//         PrintOpcodes(opcodes);
 
-        //std::string panel[column][row];
-        //PrintPanel(panel);
-        //InitializePanel(panel);
-        //PrintPanel(panel);
-        //HullRobot robot;
+        std::string panel[column][row];
+        InitializePanel(panel);
+//         PrintPanel(panel);
 
-        //auto color = (panel[robot.x][robot.y] == ".") ? 0 : 1;
-        //output.emplace(color);
-        //std::cout << output.front() << std::endl;
-        //int res = 0;
-        //Operation(opcodes, output, robot, panel, res);
+        HullRobot robot;
+        auto color = (panel[robot.x][robot.y] == ".") ? 0 : 1;
+        output.emplace(color);
+        int res = 0;
+        Operation(opcodes, output, robot, panel, res);
 
-        //std::cout << "Result is: " << res;
+        PrintPanel(panel);
+
+        std::cout << "Result is: " << res;
     }
     catch (std::string& exception_string)
     {
