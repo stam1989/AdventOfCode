@@ -1,3 +1,11 @@
+//============================================================================
+// Name        : Adventofcode.cpp
+// Author      : Stamatis Chiotis
+// Version     :
+// Copyright   : Your copyright notice
+// Description : Hello World in C++, Ansi-style
+//============================================================================
+
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -88,7 +96,7 @@ void PrintPswds(std::vector<std::string> pswds)
 
 int main(int argc, char* argv[])
 {
-    std::string FILE = "resources/Day4.txt";
+    std::string FILE = "../../../resources/Day4.txt";
 
 	std::ifstream input(FILE);
 	std::vector<int> range;

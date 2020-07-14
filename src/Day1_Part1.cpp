@@ -1,3 +1,11 @@
+//============================================================================
+// Name        : Adventofcode.cpp
+// Author      : Stamatis Chiotis
+// Version     :
+// Copyright   : Your copyright notice
+// Description : Hello World in C++, Ansi-style
+//============================================================================
+
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -17,7 +25,7 @@ void PrintResult(int& res)
 
 int main() {
 
-    std::string FILE = "resources/Day1.txt";
+    std::string FILE = "../../../resources/Day1.txt";
 
 	std::ifstream input(FILE);
 	std::string line_input;

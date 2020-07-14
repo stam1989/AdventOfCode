@@ -1,3 +1,11 @@
+//============================================================================
+// Name        : Adventofcode.cpp
+// Author      : Stamatis Chiotis
+// Version     :
+// Copyright   : Your copyright notice
+// Description : Hello World in C++, Ansi-style
+//============================================================================
+
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -152,7 +160,7 @@ void PrintSortestDistance(Intersections& intersections)
 
 int main(int argc, char* argv[])
 {
-    std::string FILE = "resources/Day3.txt";
+    std::string FILE = "../../../resources/Day3.txt";
 
 	std::ifstream input(FILE);
 	Wires wires;
