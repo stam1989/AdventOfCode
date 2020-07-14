@@ -19,10 +19,12 @@
 #include <queue>
 #include <cstdint>
 
+typedef std::vector<std::pair<int, int>> PaintedPanels;    // a vector with the coords of the panels have been painted at least once
 
 static constexpr char FILENAME[] = "../../../resources/Day11.txt";
 static constexpr int row = 190;
 static constexpr int column = 190;
+
 
 
 enum OpCode
@@ -220,7 +222,7 @@ void PaintAndMoveRobot(HullRobot& robot, std::string panel[][row], std::queue<ui
 }
 
 
-void Operation(std::vector<int64_t> opcodes, std::queue<uint8_t>& output, HullRobot& robot, std::string panel[][row], int& res)
+void Operation(std::vector<int64_t> opcodes, std::queue<uint8_t>& output, HullRobot& robot, std::string panel[][row], PaintedPanels& painted_panels)
 {
     int ip = 0, relative_base = 0;
     bool cont = true;
@@ -259,7 +261,7 @@ void Operation(std::vector<int64_t> opcodes, std::queue<uint8_t>& output, HullRo
             }
             case OpCode::OP_IN:
             {
-                long temp, pos;
+                long pos;
                 pos = (param_modes[0] == 0) ? opcodes[ip + 1] : ((param_modes[0] == 1) ? ip + 1 : opcodes[ip + 1] + relative_base);
 
                 if (output.empty())
@@ -277,13 +279,18 @@ void Operation(std::vector<int64_t> opcodes, std::queue<uint8_t>& output, HullRo
 
                 long arg1 = (param_modes[0] == 0) ? opcodes[opcodes[ip + 1]] : ((param_modes[0] == 1) ? opcodes[ip + 1] : opcodes[opcodes[ip + 1] + relative_base]);
 
-                int pos = (param_modes[0] == 0) ? opcodes[ip + 1] : ((param_modes[0] == 1) ? (ip + 1) : relative_base + opcodes[ip + 1]);
+//                 int pos = (param_modes[0] == 0) ? opcodes[ip + 1] : ((param_modes[0] == 1) ? (ip + 1) : relative_base + opcodes[ip + 1]);
 
                 output.emplace(arg1);
 
                 if (output.size() == 2)
                 {
-                    res++;
+                    auto robot_spot = std::make_pair(robot.x, robot.y);
+                    auto it = std::find(painted_panels.begin(), painted_panels.end(), robot_spot);
+                    if(it == painted_panels.end())
+                    {
+                        painted_panels.emplace_back(robot_spot);
+                    }
                     PaintAndMoveRobot(robot, panel, output);
                 }
 
@@ -406,12 +413,12 @@ int main(int argc, char* argv[])
         HullRobot robot;
         auto color = (panel[robot.x][robot.y] == ".") ? 0 : 1;
         output.emplace(color);
-        int res = 0;
-        Operation(opcodes, output, robot, panel, res);
+        PaintedPanels painted_panels;
+        Operation(opcodes, output, robot, panel, painted_panels);
 
         PrintPanel(panel);
 
-        std::cout << "Result is: " << res;
+        std::cout << "Result is: " << painted_panels.size();
     }
     catch (std::string& exception_string)
     {
