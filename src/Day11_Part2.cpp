@@ -19,12 +19,11 @@
 #include <queue>
 #include <cstdint>
 
-typedef std::vector<std::pair<int, int>> PaintedPanels;    // a vector with the coords of the panels have been painted at least once
 typedef std::vector<std::vector<uint8_t>> Panel;
 
 static constexpr char FILENAME[] = "../../../resources/Day11.txt";
-static constexpr int row = 190;
-static constexpr int column = 190;
+static constexpr int row = 200;
+static constexpr int column = 200;
 
 
 
@@ -70,19 +69,6 @@ void InitializingMemory(std::vector<int64_t>& opcodes)
         std::cout << "InitializingMemory finished\n";
 }
 
-void InitializePanel(Panel &panel)
-{
-    for (int x = 0; x < column; x++)
-    {
-        std::vector<uint8_t> p_temp;
-        for  (int y = 0; y < row; y++)
-        {
-            p_temp.emplace_back(46);    // 46 = "." (ascii table)
-        }
-        panel.emplace_back(p_temp);
-    }
-    panel[column / 2][row / 2] = 35;    // 35 = "#" (ascii table)
-}
 
 void FillWithZeros(std::vector<int>& param_modes)
 {
@@ -225,7 +211,7 @@ void PaintAndMoveRobot(HullRobot& robot, Panel& panel, std::queue<uint8_t>& outp
 }
 
 
-void Operation(std::vector<int64_t> opcodes, std::queue<uint8_t>& output, HullRobot& robot, Panel& panel, PaintedPanels& painted_panels)
+void Operation(std::vector<int64_t> opcodes, std::queue<uint8_t>& output, HullRobot& robot, Panel& panel)
 {
     int ip = 0, relative_base = 0;
     bool cont = true;
@@ -287,11 +273,6 @@ void Operation(std::vector<int64_t> opcodes, std::queue<uint8_t>& output, HullRo
                 if (output.size() == 2)
                 {
                     auto robot_spot = std::make_pair(robot.x, robot.y);
-                    auto it = std::find(painted_panels.begin(), painted_panels.end(), robot_spot);
-                    if(it == painted_panels.end())
-                    {
-                        painted_panels.emplace_back(robot_spot);
-                    }
                     PaintAndMoveRobot(robot, panel, output);
                 }
 
@@ -404,22 +385,18 @@ int main(int argc, char* argv[])
         std::queue<uint8_t> output;
 
         InitializingMemory(opcodes);
-//         PrintOpcodes(opcodes);
 
-//         uint8_t panel[column][row];
-        Panel panel;    // 46 = "." (ascii table)
-        InitializePanel(panel);
+        Panel panel(column, std::vector<uint8_t>(row, 46));
+        panel[column / 2][row / 2] = 35;    // 35 = "#" (ascii table)
         PrintPanel(panel);
 
         HullRobot robot;
         auto color = (panel[robot.x][robot.y] == 46) ? 0 : 1;    // 46 = "." (ascii table)
+
         output.emplace(color);
-        PaintedPanels painted_panels;
-        Operation(opcodes, output, robot, panel, painted_panels);
+        Operation(opcodes, output, robot, panel);
 
         PrintPanel(panel);
-
-        std::cout << "Result is: " << painted_panels.size();
     }
     catch (std::string& exception_string)
     {
