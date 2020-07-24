@@ -18,12 +18,13 @@
 #include <map>
 #include <queue>
 #include <cstdint>
+#include <csignal>
 
 typedef std::vector<std::vector<uint8_t>> Panel;
 
 static constexpr char FILENAME[] = "../../../resources/Day11.txt";
-static constexpr int row = 200;
-static constexpr int column = 200;
+static constexpr int row = 160;
+static constexpr int column = 160;
 
 
 
@@ -43,6 +44,7 @@ enum OpCode
 /// 2 == relative mode
 /// 1 == immediate mode
 /// 0 == position mode
+
 
 void InitializingMemory(std::vector<int64_t>& opcodes)
 {
@@ -78,6 +80,7 @@ void FillWithZeros(std::vector<int>& param_modes)
     }
 }
 
+
 void SetMode(std::vector<int64_t>& opcodes, std::vector<int>& param_modes, int64_t& opcode, int ip)
 {
     param_modes.clear();
@@ -91,6 +94,7 @@ void SetMode(std::vector<int64_t>& opcodes, std::vector<int>& param_modes, int64
         temp /= 10;
     }
 }
+
 
 void SetArgs(long &arg1, long& arg2, std::vector<int64_t> &opcodes, int& ip, std::vector<int>& param_modes, int& relative_base)
 {
@@ -110,6 +114,7 @@ enum Face
     LEFT
 };
 
+
 struct HullRobot
 {
     HullRobot() : x(column / 2), y(row / 2), face(Face::UP) {}
@@ -119,11 +124,13 @@ struct HullRobot
     Face face;
 };
 
+
 enum Color
 {
     BLACK = 0,
     WHITE
 };
+
 
 enum Direction
 {
@@ -131,10 +138,11 @@ enum Direction
     MOVE_RIGHT       // 90 degrees right
 };
 
-void PaintAndMoveRobot(HullRobot& robot, Panel& panel, std::queue<uint8_t>& output)
+
+void PaintAndMoveRobot(HullRobot& robot, Panel& panel, std::vector<uint8_t>& output)
 {
     panel[robot.x][robot.y] = (output.front() == 0) ? 46 : 35;  // 46 = ".", 35 = "#" (ascii table)
-    output.pop();
+    output.erase(output.begin());
 
     if (output.front() == static_cast<long>(Direction::MOVE_LEFT))
     {
@@ -204,20 +212,51 @@ void PaintAndMoveRobot(HullRobot& robot, Panel& panel, std::queue<uint8_t>& outp
             }
         }
     }
-    output.pop();
+    output.erase(output.begin());
 
     auto color = (panel[robot.x][robot.y] == 46) ? 0 : 1;    // 46 = "." (ascii table)
-    output.emplace(color);
+    output.emplace_back(color);
 }
 
 
-void Operation(std::vector<int64_t> opcodes, std::queue<uint8_t>& output, HullRobot& robot, Panel& panel)
+void PrintOpcodes(std::vector<int64_t>& opcodes)
+{
+    std::cout << "PrintOpcodes starts \n";
+    for (auto& opcode : opcodes)
+    {
+        std::cout << opcode << ",";
+    }
+    std::cout << "PrintOpcodes finished \n\n";
+}
+
+
+void PrintPanel(Panel &panel)
+{
+    std::cout << "PrintPanel starts \n";
+
+    for(auto& p : panel)
+    {
+        for (auto& spot : p)
+        {
+            std::cout << spot;
+        }
+        std::cout << std::endl;
+    }
+    std::cout << "PrintPanel finished \n";
+}
+
+
+void Operation(std::vector<int64_t> opcodes, std::vector<uint8_t>& output, HullRobot& robot, Panel& panel)
 {
     int ip = 0, relative_base = 0;
     bool cont = true;
     std::vector<int> param_modes;
     while (ip < opcodes.size() && cont)
     {
+//         if (ip == 324)
+//         {
+//             std::raise(SIGINT);
+//         }
         int64_t opcode = opcodes[ip];
         SetMode(opcodes, param_modes, opcode, ip);
         FillWithZeros(param_modes);
@@ -259,7 +298,7 @@ void Operation(std::vector<int64_t> opcodes, std::queue<uint8_t>& output, HullRo
                 }
 
                 opcodes[pos] = output.front();
-                output.pop();
+                output.erase(output.begin());
                 ip += 2;
                 break;
             }
@@ -268,7 +307,7 @@ void Operation(std::vector<int64_t> opcodes, std::queue<uint8_t>& output, HullRo
 
                 long arg1 = (param_modes[0] == 0) ? opcodes[opcodes[ip + 1]] : ((param_modes[0] == 1) ? opcodes[ip + 1] : opcodes[opcodes[ip + 1] + relative_base]);
 
-                output.emplace(arg1);
+                output.emplace_back(arg1);
 
                 if (output.size() == 2)
                 {
@@ -338,6 +377,8 @@ void Operation(std::vector<int64_t> opcodes, std::queue<uint8_t>& output, HullRo
             case OpCode::OP_TERMINATE:
             {
                 cont = false;
+                PrintPanel(panel);
+
                 break;
             }
             default:
@@ -352,48 +393,24 @@ void Operation(std::vector<int64_t> opcodes, std::queue<uint8_t>& output, HullRo
     }
 }
 
-void PrintOpcodes(std::vector<int64_t>& opcodes)
-{
-    std::cout << "PrintOpcodes starts \n";
-    for (auto& opcode : opcodes)
-    {
-        std::cout << opcode << ",";
-    }
-    std::cout << "PrintOpcodes finished \n\n";
-}
-
-void PrintPanel(Panel &panel)
-{
-    std::cout << "PrintPanel starts \n";
-
-    for(auto& p : panel)
-    {
-        for (auto& spot : p)
-        {
-            std::cout << spot;
-        }
-        std::cout << std::endl;
-    }
-    std::cout << "PrintPanel finished \n";
-}
 
 int main(int argc, char* argv[])
 {
     try
     {
         std::vector<int64_t> opcodes(34463339, 0);  // initialize the opcode vector with zeros
-        std::queue<uint8_t> output;
+        std::vector<uint8_t> output;
 
         InitializingMemory(opcodes);
 
         Panel panel(column, std::vector<uint8_t>(row, 46));
         panel[column / 2][row / 2] = 35;    // 35 = "#" (ascii table)
-        PrintPanel(panel);
+//         PrintPanel(panel);
 
         HullRobot robot;
         auto color = (panel[robot.x][robot.y] == 46) ? 0 : 1;    // 46 = "." (ascii table)
 
-        output.emplace(color);
+        output.emplace_back(color);
         Operation(opcodes, output, robot, panel);
 
         PrintPanel(panel);
@@ -407,7 +424,6 @@ int main(int argc, char* argv[])
         std::cout << e.what() << std::endl;
     }
     
-
     return 0;
 }
 
