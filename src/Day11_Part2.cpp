@@ -23,8 +23,8 @@
 typedef std::vector<std::vector<uint8_t>> Panel;
 
 static constexpr char FILENAME[] = "../../../resources/Day11.txt";
-static constexpr int row = 160;
-static constexpr int column = 160;
+static constexpr int row = 110;
+static constexpr int column = 110;
 
 
 
@@ -105,6 +105,13 @@ void SetArgs(long &arg1, long& arg2, std::vector<int64_t> &opcodes, int& ip, std
     ((param_modes[1] == 1) ? opcodes[ip + 2] : opcodes[opcodes[ip + 2] + relative_base]);
 }
 
+void ResizePuzzleInputContainer(std::vector<int64_t> &opcodes, const long& new_size)
+{
+    if (opcodes.size() < new_size)
+    {
+        opcodes.resize(new_size, 0);
+    }
+}
 
 enum Face
 {
@@ -270,7 +277,7 @@ void Operation(std::vector<int64_t> opcodes, std::vector<uint8_t>& output, HullR
 
                 pos = (param_modes[2] == 0) ? opcodes[ip + 3] : ((param_modes[2] == 1) ? (ip + 3) : opcodes[ip + 3] + 		relative_base);
 
-
+                ResizePuzzleInputContainer(opcodes, pos);
                 opcodes[pos] = arg1 + arg2;
                 ip += 4;
                 break;
@@ -282,6 +289,7 @@ void Operation(std::vector<int64_t> opcodes, std::vector<uint8_t>& output, HullR
                 SetArgs(arg1, arg2, opcodes, ip, param_modes, relative_base);
                 pos = (param_modes[2] == 0) ? opcodes[ip + 3] : ((param_modes[2] == 1) ? (ip + 3) : opcodes[ip + 3] + relative_base);
 
+                ResizePuzzleInputContainer(opcodes, pos);
                 opcodes[pos] = arg1 * arg2;
 
                 ip += 4;
@@ -351,6 +359,7 @@ void Operation(std::vector<int64_t> opcodes, std::vector<uint8_t>& output, HullR
                 SetArgs(arg1, arg2, opcodes, ip, param_modes, relative_base);
                 pos = (param_modes[2] == 0) ? opcodes[ip + 3] : ((param_modes[2] == 1) ? ip + 3 : opcodes[ip + 3] + relative_base);
 
+                ResizePuzzleInputContainer(opcodes, pos);
                 opcodes[pos] = (arg1 < arg2) ? 1 : 0;
                 ip += 4;
                 break;
@@ -361,6 +370,7 @@ void Operation(std::vector<int64_t> opcodes, std::vector<uint8_t>& output, HullR
                 SetArgs(arg1, arg2, opcodes, ip, param_modes, relative_base);
                 pos = (param_modes[2] == 0) ? opcodes[ip + 3] : ((param_modes[2] == 1) ? ip + 3 : opcodes[ip + 3] + relative_base);
 
+                ResizePuzzleInputContainer(opcodes, pos);
                 opcodes[pos] = (arg1 == arg2) ? 1 : 0;
                 ip += 4;
                 break;
