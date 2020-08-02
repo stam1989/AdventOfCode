@@ -12,6 +12,7 @@
 #include <string>
 #include <exception>
 #include <memory>
+#include <algorithm>
 
 
 constexpr int STEPS = 1000;
@@ -144,6 +145,14 @@ public:
         return *this;
     }
     
+    bool operator==(Moon& m1)
+    {
+        if (m1.p == this->p && m1.v == this->v)
+        {
+            return true;
+        }
+        return false;
+    }
     
     
     Position p;
@@ -152,44 +161,44 @@ public:
 };
 
 
-void ApplyGravity(std::shared_ptr<Moon>& m1, std::shared_ptr<Moon>& m2)
+void ApplyGravity(Moon& m1, Moon& m2)
 {
-    if (m1->p.x > m2->p.x)
+    if (m1.p.x > m2.p.x)
     {
-        m1->v.x--;
-        m2->v.x++;
+        m1.v.x--;
+        m2.v.x++;
     }
-    else if (m1->p.x < m2->p.x)
+    else if (m1.p.x < m2.p.x)
     {
-        m1->v.x++;
-        m2->v.x--;
-    }
-    
-    if (m1->p.y > m2->p.y)
-    {
-        m1->v.y--;
-        m2->v.y++;
-    }
-    else if (m1->p.y < m2->p.y)
-    {
-        m1->v.y++;
-        m2->v.y--;
+        m1.v.x++;
+        m2.v.x--;
     }
     
-    if (m1->p.z > m2->p.z)
+    if (m1.p.y > m2.p.y)
     {
-        m1->v.z--;
-        m2->v.z++;
+        m1.v.y--;
+        m2.v.y++;
     }
-    else if (m1->p.z < m2->p.z)
+    else if (m1.p.y < m2.p.y)
     {
-        m1->v.z++;
-        m2->v.z--;
+        m1.v.y++;
+        m2.v.y--;
+    }
+    
+    if (m1.p.z > m2.p.z)
+    {
+        m1.v.z--;
+        m2.v.z++;
+    }
+    else if (m1.p.z < m2.p.z)
+    {
+        m1.v.z++;
+        m2.v.z--;
     }
 
 }
 
-void UpdateVelocity(std::vector<std::shared_ptr<Moon>>& moons)
+void UpdateVelocity(std::vector<Moon>& moons)
 {
     for (auto i = 0; i < moons.size() - 1; i++)
     {
@@ -203,14 +212,14 @@ void UpdateVelocity(std::vector<std::shared_ptr<Moon>>& moons)
     }
 }
 
-void ApplyVelocity(std::shared_ptr<Moon>& m)
+void ApplyVelocity(Moon& m)
 {
-    m->p.x += m->v.x;
-    m->p.y += m->v.y;
-    m->p.z += m->v.z;
+    m.p.x += m.v.x;
+    m.p.y += m.v.y;
+    m.p.z += m.v.z;
 }
 
-void UpdatePosition(std::vector<std::shared_ptr<Moon>>& moons)
+void UpdatePosition(std::vector<Moon>& moons)
 {
     for (auto i = 0; i < moons.size(); i++)
     {
@@ -219,23 +228,25 @@ void UpdatePosition(std::vector<std::shared_ptr<Moon>>& moons)
 }
 
 
-void TimeStep(std::vector<std::shared_ptr<Moon>>& moons)
+std::vector<Moon> TimeStep(std::vector<Moon>& moons)
 {    
     UpdateVelocity(moons);
     UpdatePosition(moons);
+
+    return moons;
 }
 
-uint64_t CalculatePotentialEnergy(const std::shared_ptr<Moon>& m)
+uint64_t CalculatePotentialEnergy(const Moon& m)
 {
-    return abs(m->p.x) + abs(m->p.y) + abs(m->p.z);
+    return abs(m.p.x) + abs(m.p.y) + abs(m.p.z);
 }
 
-uint64_t CalculateKineticEnergy(const std::shared_ptr<Moon>& m)
+uint64_t CalculateKineticEnergy(const Moon& m)
 {
-        return abs(m->v.x) + abs(m->v.y) + abs(m->v.z);
+        return abs(m.v.x) + abs(m.v.y) + abs(m.v.z);
 }
 
-uint64_t CalculateTotalEnergy(const std::shared_ptr<Moon>& m)
+uint64_t CalculateTotalEnergy(const Moon& m)
 {
     return CalculatePotentialEnergy(m) * CalculateKineticEnergy(m);
 }
@@ -243,33 +254,32 @@ uint64_t CalculateTotalEnergy(const std::shared_ptr<Moon>& m)
 
 int main()
 {
+    Moon Io(-16, -1, -12);
+    Moon Europa(0, -4, -17);
+    Moon Ganymede(-11, 11, 0);
+    Moon Callisto(2, 2, -6);    
     
-    std::shared_ptr<Moon> Io(std::make_shared<Moon>(-16, -1, -12));
-    std::shared_ptr<Moon> Europa(std::make_shared<Moon>(0, -4, -17));
-    std::shared_ptr<Moon> Ganymede(std::make_shared<Moon>(-11, 11, 0));
-    std::shared_ptr<Moon> Callisto(std::make_shared<Moon>(2, 2, -6));
-    
-    std::shared_ptr<Moon> Io2(std::make_shared<Moon>(-16, -1, -12));
-    std::shared_ptr<Moon> Europa2(std::make_shared<Moon>(0, -4, -17));
-    std::shared_ptr<Moon> Ganymede2(std::make_shared<Moon>(-11, 11, 0));
-    std::shared_ptr<Moon> Callisto2(std::make_shared<Moon>(2, 2, -6));
-    
-    std::vector<std::shared_ptr<Moon>> moons{ Io, Europa, Ganymede, Callisto};
-    std::vector<std::shared_ptr<Moon>> moons2{ Io2, Europa2, Ganymede2, Callisto2};
+    std::vector<Moon> moons{ Io, Europa, Ganymede, Callisto};
+
+    std::vector<std::vector<Moon>> v_moons{ moons };
+
     int step = 0;
     while(1)
     {
-        TimeStep(moons);
+        v_moons.emplace_back(TimeStep(moons));
         step++;
-        if(moons != moons2)
+        TimeStep(moons);
+        for (auto m : v_moons)
         {
-            break;
+            auto it = std::find(v_moons.begin(), v_moons.end(), m);
+            if (it != v_moons.end())
+            {
+                std::cout << "steps: " << step << std::endl;
+                return 0;
+            }
         }
     }
     
-    std::cout << "steps: " << step << std::endl;
-
     
-	return 0;
 }
 
