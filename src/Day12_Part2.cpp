@@ -154,7 +154,6 @@ public:
         return false;
     }
     
-    
     Position p;
     Velocity v;
 
@@ -233,7 +232,9 @@ std::vector<Moon> TimeStep(std::vector<Moon>& moons)
     UpdateVelocity(moons);
     UpdatePosition(moons);
 
-    return moons;
+    std::vector<Moon> res(moons);
+    
+    return res;
 }
 
 uint64_t CalculatePotentialEnergy(const Moon& m)
@@ -266,15 +267,16 @@ int main()
     int step = 0;
     while(1)
     {
+//         TimeStep(moons);
         v_moons.emplace_back(TimeStep(moons));
         step++;
-        TimeStep(moons);
-        for (auto m : v_moons)
+        
+        for (auto i = 0; i < v_moons.size() - 1; i++)
         {
-            auto it = std::find(v_moons.begin(), v_moons.end(), m);
-            if (it != v_moons.end())
+            if (v_moons[i][0] == v_moons.back()[0] && v_moons[i][1] == v_moons.back()[1] &&
+                v_moons[i][2] == v_moons.back()[2] && v_moons[i][3] == v_moons.back()[3])
             {
-                std::cout << "steps: " << step << std::endl;
+                std::cout << "step: " << step << std::endl;
                 return 0;
             }
         }
