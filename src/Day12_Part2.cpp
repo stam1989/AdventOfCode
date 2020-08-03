@@ -14,8 +14,8 @@
 #include <memory>
 #include <algorithm>
 
+#include <csignal>
 
-constexpr int STEPS = 1000;
 
 struct Position
 {
@@ -227,14 +227,12 @@ void UpdatePosition(std::vector<Moon>& moons)
 }
 
 
-std::vector<Moon> TimeStep(std::vector<Moon>& moons)
+void TimeStep(std::vector<Moon>& moons)
 {    
     UpdateVelocity(moons);
     UpdatePosition(moons);
 
-    std::vector<Moon> res(moons);
-    
-    return res;
+//     return moons;
 }
 
 uint64_t CalculatePotentialEnergy(const Moon& m)
@@ -258,28 +256,46 @@ int main()
     Moon Io(-16, -1, -12);
     Moon Europa(0, -4, -17);
     Moon Ganymede(-11, 11, 0);
-    Moon Callisto(2, 2, -6);    
+    Moon Callisto(2, 2, -6);
     
+
+//     <x=-1, y=0, z=2>
+//     <x=2, y=-10, z=-7>
+//     <x=4, y=-8, z=8>
+//     <x=3, y=5, z=-1>
+
+
+//     Moon Io(-1, 0, 2);
+//     Moon Europa(2, -10, -7);
+//     Moon Ganymede(4, -8, 8);
+//     Moon Callisto(3, 5, -1);
+
     std::vector<Moon> moons{ Io, Europa, Ganymede, Callisto};
+    std::vector<Moon> moons_first(moons);
+//     std::vector<std::vector<Moon>> v_moons{ moons };
 
-    std::vector<std::vector<Moon>> v_moons{ moons };
-
-    int step = 0;
+    uint64_t step = 0;
     while(1)
     {
-//         TimeStep(moons);
-        v_moons.emplace_back(TimeStep(moons));
+//         if (step == 4686774923)
+//         {
+//             std::raise(SIGINT);
+//         }
+//         v_moons.emplace_back(TimeStep(moons));
+        TimeStep(moons);
         step++;
-        
-        for (auto i = 0; i < v_moons.size() - 1; i++)
+//         std::cout<< "step: " << step << std::endl;
+//         for (uint64_t i = 0; i < v_moons.size() - 1; i++)
+//         {
+//             if (v_moons[i][0] == v_moons.back()[0] && v_moons[i][1] == v_moons.back()[1] &&
+//                 v_moons[i][2] == v_moons.back()[2] && v_moons[i][3] == v_moons.back()[3])
+        if (moons[0] == moons_first[0] && moons[1] == moons_first[1] &&
+            moons[2] == moons_first[2] && moons[3] == moons_first[3])
         {
-            if (v_moons[i][0] == v_moons.back()[0] && v_moons[i][1] == v_moons.back()[1] &&
-                v_moons[i][2] == v_moons.back()[2] && v_moons[i][3] == v_moons.back()[3])
-            {
-                std::cout << "step: " << step << std::endl;
-                return 0;
-            }
+            std::cout << "final step: " << step << std::endl;
+            return 0;
         }
+//         }
     }
     
     
