@@ -13,7 +13,7 @@
 #include <exception>
 #include <memory>
 #include <algorithm>
-
+#include <numeric>
 #include <csignal>
 
 
@@ -258,46 +258,54 @@ int main()
     Moon Ganymede(-11, 11, 0);
     Moon Callisto(2, 2, -6);
     
-
-//     <x=-1, y=0, z=2>
-//     <x=2, y=-10, z=-7>
-//     <x=4, y=-8, z=8>
-//     <x=3, y=5, z=-1>
-
-
-//     Moon Io(-1, 0, 2);
-//     Moon Europa(2, -10, -7);
-//     Moon Ganymede(4, -8, 8);
-//     Moon Callisto(3, 5, -1);
-
     std::vector<Moon> moons{ Io, Europa, Ganymede, Callisto};
     std::vector<Moon> moons_first(moons);
-//     std::vector<std::vector<Moon>> v_moons{ moons };
 
+    bool axis_x = false, axys_y = false, axis_z = false;
+    
     uint64_t step = 0;
+    int64_t step_x = -1, step_y = -1, step_z = -1;
     while(1)
     {
-//         if (step == 4686774923)
-//         {
-//             std::raise(SIGINT);
-//         }
-//         v_moons.emplace_back(TimeStep(moons));
         TimeStep(moons);
         step++;
-//         std::cout<< "step: " << step << std::endl;
-//         for (uint64_t i = 0; i < v_moons.size() - 1; i++)
-//         {
-//             if (v_moons[i][0] == v_moons.back()[0] && v_moons[i][1] == v_moons.back()[1] &&
-//                 v_moons[i][2] == v_moons.back()[2] && v_moons[i][3] == v_moons.back()[3])
-        if (moons[0] == moons_first[0] && moons[1] == moons_first[1] &&
-            moons[2] == moons_first[2] && moons[3] == moons_first[3])
+
+        if (moons[0].p.x == moons_first[0].p.x && moons[0].v.x == moons_first[0].v.x &&
+            moons[1].p.x == moons_first[1].p.x && moons[1].v.x == moons_first[1].v.x &&
+            moons[2].p.x == moons_first[2].p.x && moons[2].v.x == moons_first[2].v.x &&
+            moons[3].p.x == moons_first[3].p.x && moons[3].v.x == moons_first[3].v.x)
         {
-            std::cout << "final step: " << step << std::endl;
-            return 0;
+            step_x = step;
+            std::cout << "step_x: " << step_x << std::endl;
         }
-//         }
+        
+        if (moons[0].p.y == moons_first[0].p.y && moons[0].v.y == moons_first[0].v.y &&
+            moons[1].p.y == moons_first[1].p.y && moons[1].v.y == moons_first[1].v.y &&
+            moons[2].p.y == moons_first[2].p.y && moons[2].v.y == moons_first[2].v.y &&
+            moons[3].p.y == moons_first[3].p.y && moons[3].v.y == moons_first[3].v.y)
+        {
+            step_y = step;
+            std::cout << "step_y: " << step_y << std::endl;
+        }
+        
+        if (moons[0].p.z == moons_first[0].p.z && moons[0].v.z == moons_first[0].v.z &&
+            moons[1].p.z == moons_first[1].p.z && moons[1].v.z == moons_first[1].v.z &&
+            moons[2].p.z == moons_first[2].p.z && moons[2].v.z == moons_first[2].v.z &&
+            moons[3].p.z == moons_first[3].p.z && moons[3].v.z == moons_first[3].v.z)
+        {
+            step_z = step;
+            std::cout << "step_z: " << step_z << std::endl;
+        }
+        
+        if (step_x > 0 && step_y > 0 && step_z > 0)
+        {
+            std::cout << "break\n";
+            break;
+        }
     }
     
+    uint64_t res = std::lcm(uint64_t(std::lcm(step_x, step_y)), uint64_t(step_z));
     
+    std::cout << "Steps are: " << res << std::endl;
 }
 
