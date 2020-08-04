@@ -30,6 +30,7 @@ install(FILES
     #>>> src/*.cpp
     Intcode.cpp
     Day13_Part1.cpp
+    Day13_Part2.cpp
     )
 
 
@@ -56,6 +57,7 @@ add_executable(Day11_Part2 Day11_Part2.cpp)
 add_executable(Day12_Part1 Day12_Part1.cpp)
 add_executable(Day12_Part2 Day12_Part2.cpp)
 add_executable(Day13_Part1 Day13_Part1.cpp)
+add_executable(Day13_Part2 Day13_Part2.cpp)
 
 install(TARGETS Day1_Part1
 				Day1_Part2
@@ -78,6 +80,7 @@ install(TARGETS Day1_Part1
 				Day12_Part1
 				Day12_Part2
 				Day13_Part1
+				Day13_Part2
 		RUNTIME DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/install/bin)
 
 		

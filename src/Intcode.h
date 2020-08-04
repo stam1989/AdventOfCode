@@ -38,6 +38,31 @@ namespace Intcode
     /// 0 == position mode
 
 
+    enum TileId
+    {
+        Empty = 0,          // No game object appears in this tile ('.' = 46)
+        Wall,               // Walls are indestructible barriers ('#' = 35)
+        Block,              // Blocks can be broken by the ball ('*' = 42)
+        HorizontalPaddle,   // The paddle is indestructible ('P' = 80)
+        Ball                // The ball moves diagonally and bounces off objects ('B' = 66)
+    };
+
+    enum Joystick
+    {
+        Left = -1,
+        Neutral = 0,
+        Right = 1
+    };
+
+    struct Tile
+    {
+        Tile() : x(0), y(0), id(46) {}
+        Tile(int x_input, int y_input, int id_input) : x(x_input), y(y_input), id(id_input) {}
+        Tile(const Tile& t) : x(t.x), y(t.y), id(t.id) {}
+
+        int x, y, id;
+    };
+
     void FillWithZeros(std::vector<int>& param_modes);
 
     void SetMode(std::vector<int64_t>& opcodes, std::vector<int>& param_modes, int64_t& opcode, int ip);
@@ -48,5 +73,5 @@ namespace Intcode
 
     void InitializingMemory(std::vector<int64_t>& opcodes, std::string& filename);
 
-    void Operation(std::vector<int64_t> opcodes, std::vector<uint8_t>& output);
+    void Operation(std::vector<int64_t> opcodes, std::vector<uint8_t>& output, std::vector<Tile>& tiles);
 }

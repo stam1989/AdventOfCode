@@ -10,6 +10,10 @@
 
 #include <memory>
 #include <iostream>
+#include <algorithm>
+
+typedef std::vector<Intcode::Tile> Tiles;
+
 
 
 int main(int argc, char* argv[])
@@ -19,13 +23,20 @@ int main(int argc, char* argv[])
         std::vector<uint8_t> output;
         std::vector<int64_t> opcodes;
 
+        Tiles tiles; // 46 = . -> ascii
 
         std::string filename("../../../resources/Day13.txt");
         Intcode::InitializingMemory(opcodes, filename);
         opcodes.resize(39463339, 0);  // fill the rest of theopcode vector with zeros
 
-        Intcode::Operation(opcodes, output);
-        std::cout << "Day13\n\n";
+        Intcode::Operation(opcodes, output, tiles);
+
+        auto count = std::count_if(tiles.begin(), tiles.end(), [](const Intcode::Tile t) { return t.id == 42; });
+
+        std::cout << "Block items: " << count << std::endl;
+
+
+
     }
     catch (std::string& exception_string)
     {
