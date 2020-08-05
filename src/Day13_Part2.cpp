@@ -19,9 +19,9 @@
 
 
 
-typedef std::vector<std::vector<int>> Panel;
-static constexpr int ROW = 39463;
-static constexpr int COLUMN = 39463;
+typedef std::vector<std::vector<std::string>> Panel;
+static constexpr int ROW = 30;
+static constexpr int COLUMN = 50;
 
 
 
@@ -45,11 +45,11 @@ enum OpCode
 
 enum TileId
 {
-    Empty = 0,          // No game object appears in this tile ('.' = 46)
-    Wall,               // Walls are indestructible barriers ('#' = 35)
-    Block,              // Blocks can be broken by the ball ('*' = 42)
-    HorizontalPaddle,   // The paddle is indestructible ('P' = 80)
-    Ball                // The ball moves diagonally and bounces off objects ('B' = 66)
+    Empty = 0,          // No game object appears in this tile ('  ')
+    Wall,               // Walls are indestructible barriers ('##')
+    Block,              // Blocks can be broken by the ball ('**')
+    HorizontalPaddle,   // The paddle is indestructible ('==')
+    Ball                // The ball moves diagonally and bounces off objects ('()')
 };
 
 enum Joystick
@@ -61,11 +61,12 @@ enum Joystick
 
 struct Tile
 {
-    Tile() : x(0), y(0), id(46) {}
-    Tile(int x_input, int y_input, int id_input) : x(x_input), y(y_input), id(id_input) {}
+    Tile() : x(0), y(0), id("  ") {}
+    Tile(int x_input, int y_input, std::string id_input) : x(x_input), y(y_input), id(id_input) {}
     Tile(const Tile& t) : x(t.x), y(t.y), id(t.id) {}
 
-    int x, y, id;
+    int x, y;
+    std::string id;
 };
 
 typedef std::vector<Tile> Tiles;
@@ -133,37 +134,32 @@ void SetMode(std::vector<int64_t>& opcodes, std::vector<int>& param_modes, int64
 
 void DrawTile(std::vector<int>& output, Tiles& tiles)
 {
-    //     auto it = std::find_if(tiles.begin(), tiles.end(), [output](const Tile& t) {
-    //         return t.x == output[0] && t.y == output[1];
-    //     });
-
-
-    int id;
+    std::string id;
     switch(output[2])
     {
         case Empty:
         {
-            id = 46;
+            id = "  ";
             break;
         }
         case Wall:
         {
-            id = 35;
+            id = "##";
             break;
         }
         case Block:
         {
-            id = 42;
+            id = "**";
             break;
         }
         case HorizontalPaddle:
         {
-            id = 80;
+            id = "==";
             break;
         }
         case Ball:
         {
-            id = 66;
+            id = "()";
             break;
         }
         default:
@@ -172,9 +168,7 @@ void DrawTile(std::vector<int>& output, Tiles& tiles)
         }
     }
 
-    Tile temp_tile(output[0], output[1], id);
-    tiles.emplace_back(temp_tile);
-
+    tiles.emplace_back(Tile(output[1], output[0], id));
     output.clear();
 }
 
@@ -204,12 +198,32 @@ void DrawPanel(Panel &panel, const Tiles& tiles)
 }
 
 
-uint64_t Operation(std::vector<int64_t> opcodes, std::vector<int>& output, Tiles& tiles, Panel& panel)
+int MoveJoystick(const Tiles& tiles)
+{
+    std::cout << "MoveJoystick starts!" << std::endl;
+    auto it_ball = std::find_if(tiles.begin(), tiles.end(), [](const Tile& t) { return t.id == "()"; });
+    auto it_paddle = std::find_if(tiles.begin(), tiles.end(), [](const Tile& t) { return t.id == "=="; });
+
+    if (it_ball->x < it_paddle->x)
+    {
+        return -1;
+    }
+    else if (it_ball->x > it_paddle->x)
+    {
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
+
+}
+
+
+void Operation(std::vector<int64_t> opcodes, std::vector<int>& output, Tiles& tiles, uint8_t& score_counter, uint64_t& score)
 {
     int ip = 0, relative_base = 0;
     bool cont = true;
-    uint64_t score = 0;
-    uint8_t score_counter;
     std::vector<int> param_modes;
     while (ip < opcodes.size() && cont)
     {
@@ -247,13 +261,7 @@ uint64_t Operation(std::vector<int64_t> opcodes, std::vector<int>& output, Tiles
                 long pos;
                 pos = (param_modes[0] == 0) ? opcodes[ip + 1] : ((param_modes[0] == 1) ? ip + 1 : opcodes[ip + 1] + relative_base);
 
-                DrawPanel(panel, tiles);
-                PrintPanel(panel);
-
-                int move;
-                std::cout << "Give input: ";
-                std::cin >> move;
-
+                opcodes[pos] = MoveJoystick(tiles);
                 ip += 2;
                 break;
             }
@@ -268,10 +276,14 @@ uint64_t Operation(std::vector<int64_t> opcodes, std::vector<int>& output, Tiles
                 {
                     if (output[0] == -1 && output[1] == 0)
                     {
-                        if (++score_counter == 3)
+                        score_counter++;
+                        std::cout << "score_counter: " << score_counter << std::endl;
+                        if (score_counter == 3)
                         {
                             score = output[2];
+                            std::cout << "score: " << score << std::endl;
                             ip += 2;
+                            score_counter = 0;
                             break;
                         }
                     }
@@ -340,7 +352,6 @@ uint64_t Operation(std::vector<int64_t> opcodes, std::vector<int>& output, Tiles
             case OP_TERMINATE:
             {
                 cont = false;
-                return score;
                 break;
             }
             default:
@@ -371,23 +382,36 @@ int main(int argc, char* argv[])
 {
     try
     {
-        std::vector<int> output;
         std::vector<int64_t> opcodes;
+        std::string filename("../../../resources/Day13.txt");
 
-        Tiles tiles; // 46 = . -> ascii
-
-        std::string filename("../../../resources/Day13_Part2.txt");
         InitializingMemory(opcodes, filename);
         opcodes.resize(3946333, 0);  // fill the rest of theopcode vector with zeros
+        opcodes[0] = 2; // set first mem address to 2 to play for free
 
-        Panel panel(COLUMN, std::vector<int>(ROW, 46));
+        Panel panel(ROW, std::vector<std::string>(COLUMN, "  "));
+        Tiles tiles;
+        std::vector<int> output;
+        uint8_t score_counter = 0;
+        uint64_t score = 0;
 
-        uint64_t score = Operation(opcodes, output, tiles, panel);
+        while(1)
+        {
 
-        DrawPanel(panel, tiles);
-        PrintPanel(panel);
+            Operation(opcodes, output, tiles, score_counter, score);
+            DrawPanel(panel, tiles);
+            PrintPanel(panel);
 
-        std::cout << "Score: " << score << std::endl;
+            auto count_blocks = std::count_if(tiles.begin(), tiles.end(), [](const Tile& t) { return t.id == "**"; });
+            std::cout << "count_blocks: " << count_blocks << std::endl;
+            std::cout << "Score: " << score << std::endl;
+
+            if (count_blocks == 0)
+            {
+                break;
+            }
+        }
+
 
     }
     catch (std::string& exception_string)
