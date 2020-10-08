@@ -6,7 +6,8 @@
 // Description : Hello World in C++, Ansi-style
 //============================================================================
 
-
+#ifndef INTCODE_H
+#define INTCODE_H
 
 #include <sstream>
 #include <csignal>
@@ -75,3 +76,5 @@ namespace Intcode
 
     void Operation(std::vector<int64_t> opcodes, std::vector<uint8_t>& output, std::vector<Tile>& tiles);
 }
+
+#endif
