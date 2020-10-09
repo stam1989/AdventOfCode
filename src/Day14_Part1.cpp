@@ -8,7 +8,7 @@
 
 
 #include <cstdint>
-#include <tuple>
+#include <map>
 #include <utility>
 #include <stdarg.h>
 #include <string_view>
@@ -20,7 +20,12 @@
 
 #include <iostream>
 
+
+using ReactInput = std::vector<std::pair<size_t, std::string>>;
+using ReactOutput = std::pair<size_t, std::string>;
+
 static uint32_t s_AllocCount = 0;
+static const char* filename = "../../../resources/Day14.txt";
 
 void* operator new(size_t s)
 {
@@ -32,12 +37,13 @@ void* operator new(size_t s)
 class Reaction {
 public:
     Reaction() = default;
-    Reaction( std::vector<std::pair<size_t, std::string_view>>& in,  std::pair<size_t, std::string_view>& out)
-        : input(in), output(out) { std::cout << "Copied\n"; }
-    Reaction( std::vector<std::pair<size_t, std::string_view>>&& in,  std::pair<size_t, std::string_view>&& out)
-        : input(std::move(in)), output(std::move(out)) { std::cout << "Moved\n"; }
+    Reaction( ReactInput& in,  ReactOutput& out)
+        : input(in), output(out) {}
+        Reaction( ReactInput&& in,  ReactOutput&& out)
+        : input(std::move(in)), output(std::move(out)) {}
 
-    Reaction(const Reaction& r) : input(r.input), output(r.output) { std::cout << "Copied\n"; }
+    Reaction(const Reaction& r) : input(r.input), output(r.output) {}
+//     Reaction(const Reaction&& r) : input(r.input), output(r.output) { std::cout << "Moved\n"; }
 
     bool operator=(Reaction& r){
         return input == r.input && output == r.output;
@@ -46,65 +52,74 @@ public:
         return input == r.input && output == r.output;
     }
 
-	void SetInput(size_t count, std::string_view element) {
-		
-	}
-	
-	void SetOutput(size_t count, std::string_view element) {
-		output = std::make_pair(count, element);
-	}
-	
+    ReactInput GetInput() { return input;}
+    ReactOutput GetOutput() { return output;}
+
 private:
-    std::vector<std::pair<size_t, std::string_view>> input;
-    std::pair<size_t, std::string_view> output;
+    ReactInput input;
+    ReactOutput output;
 };
 
+void ExtractFromStream(std::string str, std::string& count, std::string& element) {
+    std::stringstream ss(str);
+    ss >> count >> element;
+}
 
+ReactOutput MakeOutput(std::string& s) {
+    std::string temp_count, temp_el;
+    ExtractFromStream(s, temp_count, temp_el);
 
-void DecodeReaction(std::string s, Reaction res_reaction) {
-	if(s.empty()) {
-		return;
-	}
-		
-	std::string delimiter1 = "=>";
-	std::string s_out;
-	size_t pos = 0, pos2 = 0;
-	std::vector<std::pair<size_t, std::string_view>> v_input;
-	std::string input_chems;
+    std::remove(temp_count.begin(), temp_count.end(), ' ');
+    std::remove(temp_el.begin(), temp_el.end(), ' ');
+    // 	std::cout << "output:: temp_count: " << temp_count << ", temp_el: " << temp_el << std::endl;
+    return {stoll(temp_count, nullptr, 10), temp_el};
+}
+
+ReactInput MakeInput(std::string& str_inputChems) {
+    std::stringstream ss_inputChems(str_inputChems);
+    ReactInput v_input;
+    while(ss_inputChems.good()) {
+        std::string chem;
+        getline(ss_inputChems, chem, ','); //get first string delimited by comma
+        std::string temp_el, temp_count;
+
+        ExtractFromStream(chem, temp_count, temp_el);
+
+        std::remove(temp_el.begin(), temp_el.end(), ' ');
+        std::remove(temp_count.begin(), temp_count.end(), ' ');
+//         std::cout << "input:: temp_count: " << temp_count << ", temp_el: " << temp_el << std::endl;
+        v_input.emplace_back(std::make_pair(stoll(temp_count, nullptr, 10), temp_el.c_str()));
+    }
+    return v_input;
+}
+
+Reaction DecodeReaction(std::string& s) {
+
+	const std::string delimiter1("=>");
+
+    size_t pos = 0;
+    ReactInput v_input;
+    std::string str_inputChems;
 	while ((pos = s.find(delimiter1)) != std::string::npos) {
-		input_chems = s.substr(0, pos);
+        str_inputChems = s.substr(0, pos);
 // 		std::cout << "token: " << token << std::endl;
-		
-		std::stringstream s_stream(input_chems);
-		while(s_stream.good()) {
-			std::string substr;
-			getline(s_stream, substr, ','); //get first string delimited by comma
-			std::stringstream inp(substr);
-			std::string temp_count;
-			std::string temp_el;
-			inp >> temp_count >> temp_el;
-			std::remove(temp_el.begin(), temp_el.end(), ' ');
-			std::remove(temp_count.begin(), temp_count.end(), ' ');
-			std::cout << "input:: temp_count: " << temp_count << ", temp_el: " << temp_el << std::endl;			v_input.emplace_back(std::make_pair(stoll(temp_count, nullptr, 10), temp_el.c_str()));
-		}
-		 
-		 
-		 s.erase(0, pos + delimiter1.length());
+        v_input = MakeInput(str_inputChems);
+
+        s.erase(0, pos + delimiter1.length());
 	}
-	std::stringstream out(s);
-	std::string temp_count;
-	std::string temp_el;
-	out >> temp_count >> temp_el;
-	std::remove(temp_count.begin(), temp_count.end(), ' ');
-	std::remove(temp_el.begin(), temp_el.end(), ' ');
-	std::cout << "output:: temp_count: " << temp_count << ", temp_el: " << temp_el << std::endl;
-	std::pair<size_t, std::string_view> p_output({stoll(temp_count, nullptr, 10), temp_el.c_str()});
-	
-	res_reaction = Reaction(v_input, p_output);
+
+	ReactOutput p_output(MakeOutput(s));
+
+    return Reaction(v_input, p_output);
 }
 
 
-void ReadFile(const char* filename, std::vector<Reaction>& v_reactions)
+void Decode(std::string s_reaction) {
+    std::map<std::string, std::map<std::string, size_t>> m_reactions;
+}
+
+
+void ReadFile(std::vector<Reaction>& v_reactions)
 {
     std::cout << "ReadFile starts\n";
 
@@ -115,16 +130,15 @@ void ReadFile(const char* filename, std::vector<Reaction>& v_reactions)
     {
         while (std::getline(input, s_reaction))
         {
-			Reaction temp_r;
-			std::cout << "ds\n";
-			DecodeReaction(s_reaction, temp_r);
-			v_reactions.emplace_back(temp_r);
+            if (!s_reaction.empty()) {
+                v_reactions.emplace_back(DecodeReaction(s_reaction));
+            }
         }
         input.close();
     }
     else
     {
-        std::string exception_string =  "Could not open input file";
+        const char* exception_string =  "Could not open input file";
         throw std::runtime_error(exception_string);
     }
 
@@ -135,11 +149,15 @@ void ReadFile(const char* filename, std::vector<Reaction>& v_reactions)
 
 int main() {
 	std::vector<Reaction> v_reactions;
-	const char* filename = "../../../resources/Day14.txt";
-	ReadFile(filename, v_reactions);
+	ReadFile(v_reactions);
 	
-	
-	
+	auto it = std::find_if(v_reactions.begin(), v_reactions.end(), [](Reaction& r) {
+        return (r.GetOutput().second == "FUEL");
+    });
+
+    std::cout << "input first: " << it->GetInput()[0].first << " " << it->GetInput()[0].second << std::endl;
+    std::cout << "output: " << it->GetOutput().first << " " << it->GetOutput().second << std::endl;
+
 	std::cout << "Allocations:" << s_AllocCount << std::endl;
 
     return 0;
