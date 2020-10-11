@@ -8,12 +8,12 @@
 
 
 #include <cstdint>
-#include <map>
 #include <utility>
 #include <stdarg.h>
 #include <string_view>
 #include <fstream>
 #include <sstream>
+#include <map>
 #include <vector>
 #include <exception>
 #include <algorithm>
@@ -115,7 +115,7 @@ Reaction DecodeReaction(std::string& s) {
 
 
 void Decode(std::string s_reaction) {
-    std::map<std::string, std::map<std::string, size_t>> m_reactions;
+    std::unordered_map<std::string, std::unordered_map<std::string, size_t>> m_reactions;
 }
 
 
@@ -145,20 +145,96 @@ void ReadFile(std::vector<Reaction>& v_reactions)
     std::cout << "ReadFile finished\n";
 }
 
+bool CalcOres(std::unordered_map<std::string, size_t>& m_needings, std::vector<Reaction>& v_reactions, size_t& ore_counter) {
+	bool check_changes = false;
+	std::unordered_map<std::string, size_t> temp_needings(m_needings);
+	for (auto it_needings = temp_needings.begin(); it_needings != temp_needings.end(); it_needings++) {
+		auto it_reactions = std::find_if(v_reactions.begin(), v_reactions.end(), [&](Reaction& r) {
+			return (r.GetOutput().second == it_needings->first); });
+			
+		if ((it_reactions != v_reactions.end()) && 
+		    (it_needings->second % it_reactions->GetOutput().first == 0)) {
+				uint8_t div = it_needings->second / it_reactions->GetOutput().first;
+				for (auto& input: it_reactions->GetInput()) {
+					std::pair<std::unordered_map<std::string, size_t>::iterator,bool> ret;
+					if (input.second == "ORE") {
+						ore_counter += div * input.first;
+					}
+					else {
+						ret = m_needings.insert(std::pair<std::string, size_t>(input.second, div * input.first));
+						if (ret.second == false) {
+							m_needings[input.second] += div * input.first;
+						}
+					}
+				}
+				m_needings.erase(it_reactions->GetOutput().second);
+				check_changes = true;
+			}
+	}
+	
+	return check_changes;
+}
+
+// void InsertElement() {
+// 	std::pair<std::unordered_map<std::string, size_t>::iterator,bool> ret;
+// 	if (input.second == "ORE") {
+// 		ore_counter += div * input.first;
+// 	}
+// 	else {
+// 		ret = m_needings.insert(std::pair<std::string, size_t>(input.second, div * input.first));
+// 		if (ret.second == false) {
+// 			m_needings[input.second] += div * input.first;
+// 		}
+// 	}
+// }
+
 
 
 int main() {
 	std::vector<Reaction> v_reactions;
 	ReadFile(v_reactions);
-	
+
 	auto it = std::find_if(v_reactions.begin(), v_reactions.end(), [](Reaction& r) {
         return (r.GetOutput().second == "FUEL");
     });
 
-    std::cout << "input first: " << it->GetInput()[0].first << " " << it->GetInput()[0].second << std::endl;
-    std::cout << "output: " << it->GetOutput().first << " " << it->GetOutput().second << std::endl;
+	std::unordered_map<std::string, size_t> m_needings;
+	
+	for (const auto& in: it->GetInput()) {
+		m_needings.emplace(in.second, in.first);
+	}
 
-	std::cout << "Allocations:" << s_AllocCount << std::endl;
+	for (auto it = m_needings.begin(); it != m_needings.end(); it++) {
+		std::cout << it->first << " has " << it->second << std::endl;
+	}
+
+	size_t ore_counter = 0;
+	while (!m_needings.empty()) {
+		if (!CalcOres(m_needings, v_reactions, ore_counter)) {
+			auto it_reactions = std::find_if(v_reactions.begin(), v_reactions.end(), [&](Reaction& r) {
+				return (r.GetOutput().second == m_needings.begin()->first); });
+			uint8_t div = (m_needings.begin()->second / it_reactions->GetOutput().first) + 1;
+			for (auto& input: it_reactions->GetInput()) {
+				std::pair<std::unordered_map<std::string, size_t>::iterator,bool> ret;
+				if (input.second == "ORE") {
+					ore_counter += div * input.first;
+				}
+				else {
+					ret = m_needings.insert(std::pair<std::string, size_t>(input.second, div * input.first));
+					if (ret.second == false) {
+						m_needings[input.second] += div * input.first;
+					}
+				}
+			}
+			m_needings.erase(it_reactions->GetOutput().second);
+		}
+	}
+
+	std::cout << "We need " << ore_counter << " OREs!\n";
+//     std::cout << "input first: " << it->GetInput()[0].first << " " << it->GetInput()[0].second << std::endl;
+//     std::cout << "output: " << it->GetOutput().first << " " << it->GetOutput().second << std::endl;
+// 
+// 	std::cout << "Allocations:" << s_AllocCount << std::endl;
 
     return 0;
 }
