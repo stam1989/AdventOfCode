@@ -13,10 +13,11 @@
 #include <string_view>
 #include <fstream>
 #include <sstream>
-#include <map>
+#include <unordered_map>
 #include <vector>
 #include <exception>
 #include <algorithm>
+#include<iterator>
 
 #include <iostream>
 
@@ -145,50 +146,67 @@ void ReadFile(std::vector<Reaction>& v_reactions)
     std::cout << "ReadFile finished\n";
 }
 
-bool CalcOres(std::unordered_map<std::string, size_t>& m_needings, std::vector<Reaction>& v_reactions, size_t& ore_counter) {
-	bool check_changes = false;
-	std::unordered_map<std::string, size_t> temp_needings(m_needings);
-	for (auto it_needings = temp_needings.begin(); it_needings != temp_needings.end(); it_needings++) {
-		auto it_reactions = std::find_if(v_reactions.begin(), v_reactions.end(), [&](Reaction& r) {
-			return (r.GetOutput().second == it_needings->first); });
-			
-		if ((it_reactions != v_reactions.end()) && 
-		    (it_needings->second % it_reactions->GetOutput().first == 0)) {
-				uint8_t div = it_needings->second / it_reactions->GetOutput().first;
-				for (auto& input: it_reactions->GetInput()) {
-					std::pair<std::unordered_map<std::string, size_t>::iterator,bool> ret;
-					if (input.second == "ORE") {
-						ore_counter += div * input.first;
-					}
-					else {
-						ret = m_needings.insert(std::pair<std::string, size_t>(input.second, div * input.first));
-						if (ret.second == false) {
-							m_needings[input.second] += div * input.first;
-						}
-					}
-				}
-				m_needings.erase(it_reactions->GetOutput().second);
-				check_changes = true;
-			}
-	}
-	
-	return check_changes;
+size_t InsertNeeds(std::unordered_map<std::string, size_t>& umap_needs,
+                 const std::pair<size_t, std::string>& input, const size_t& div) {
+    size_t ore_counter = 0;
+    std::pair<std::unordered_map<std::string, size_t>::iterator,bool> ret;
+
+    if (input.second == "ORE") {
+        ore_counter += div * input.first;
+    }
+    else {
+        ret = umap_needs.insert(std::pair<std::string, size_t>(input.second, div * input.first));
+        if (ret.second == false) {
+            umap_needs[input.second] += div * input.first;
+        }
+    }
+    return ore_counter;
 }
 
-// void InsertElement() {
-// 	std::pair<std::unordered_map<std::string, size_t>::iterator,bool> ret;
-// 	if (input.second == "ORE") {
-// 		ore_counter += div * input.first;
-// 	}
-// 	else {
-// 		ret = m_needings.insert(std::pair<std::string, size_t>(input.second, div * input.first));
-// 		if (ret.second == false) {
-// 			m_needings[input.second] += div * input.first;
-// 		}
-// 	}
-// }
+void CheckLeftovers() {
+
+}
+
+bool CalcOres(std::unordered_map<std::string, size_t>& umap_needs, std::vector<Reaction>& v_reactions, size_t& ore_counter) {
+    bool check_changes = false;
+    std::unordered_map<std::string, size_t> temp_needs(umap_needs);
+    for (auto it_needs = temp_needs.begin(); it_needs != temp_needs.end(); it_needs++) {
+        auto it_reactions = std::find_if(v_reactions.begin(), v_reactions.end(), [&](Reaction& r) {
+            return (r.GetOutput().second == it_needs->first); });
+
+        if ((it_reactions != v_reactions.end()) &&
+            (it_needs->second % it_reactions->GetOutput().first == 0)) {
+            size_t div = it_needs->second / it_reactions->GetOutput().first;
+            for (auto& input: it_reactions->GetInput()) {
+                ore_counter += InsertNeeds(umap_needs, input, div);
+//                 std::pair<std::unordered_map<std::string, size_t>::iterator,bool> ret;
+//                 if (input.second == "ORE") {
+//                     ore_counter += div * input.first;
+//                 }
+//                 else {
+//                     ret = umap_needs.insert(std::pair<std::string, size_t>(input.second, div * input.first));
+//                     if (ret.second == false) {
+//                         umap_needs[input.second] += div * input.first;
+//                     }
+//                 }
+            }
+            umap_needs.erase(it_reactions->GetOutput().second);
+            check_changes = true;
+        }
+    }
+
+    return check_changes;
+}
 
 
+void InsertLeftovers(const size_t& leftovers, std::unordered_map<std::string, size_t>& umap_leftovers,
+                     const std::unordered_map<std::string, size_t>::iterator& it_needs) {
+    std::pair<std::unordered_map<std::string, size_t>::iterator,bool> ret_leftovers;
+    ret_leftovers = umap_leftovers.insert(std::pair<std::string, size_t>(it_needs->first, leftovers));
+    if (ret_leftovers.second == false) {
+        umap_leftovers[it_needs->first] += leftovers;
+    }
+}
 
 int main() {
 	std::vector<Reaction> v_reactions;
@@ -198,35 +216,40 @@ int main() {
         return (r.GetOutput().second == "FUEL");
     });
 
-	std::unordered_map<std::string, size_t> m_needings;
-	
+	std::unordered_map<std::string, size_t> umap_needs, umap_leftovers;
+
 	for (const auto& in: it->GetInput()) {
-		m_needings.emplace(in.second, in.first);
+		umap_needs.emplace(in.second, in.first);
 	}
 
-	for (auto it = m_needings.begin(); it != m_needings.end(); it++) {
+	for (auto it = umap_needs.begin(); it != umap_needs.end(); it++) {
 		std::cout << it->first << " has " << it->second << std::endl;
 	}
 
 	size_t ore_counter = 0;
-	while (!m_needings.empty()) {
-		if (!CalcOres(m_needings, v_reactions, ore_counter)) {
+	while (!umap_needs.empty()) {
+		if (!CalcOres(umap_needs, v_reactions, ore_counter)) {
 			auto it_reactions = std::find_if(v_reactions.begin(), v_reactions.end(), [&](Reaction& r) {
-				return (r.GetOutput().second == m_needings.begin()->first); });
-			uint8_t div = (m_needings.begin()->second / it_reactions->GetOutput().first) + 1;
+				return (r.GetOutput().second == umap_needs.begin()->first); });
+			size_t div = (umap_needs.begin()->second / it_reactions->GetOutput().first) + 1;
+            size_t leftovers = (div * umap_needs.begin()->second) - umap_needs.begin()->second;
+
+            InsertLeftovers(leftovers, umap_leftovers, umap_needs.begin());
+
 			for (auto& input: it_reactions->GetInput()) {
-				std::pair<std::unordered_map<std::string, size_t>::iterator,bool> ret;
-				if (input.second == "ORE") {
-					ore_counter += div * input.first;
-				}
-				else {
-					ret = m_needings.insert(std::pair<std::string, size_t>(input.second, div * input.first));
-					if (ret.second == false) {
-						m_needings[input.second] += div * input.first;
-					}
-				}
+                ore_counter += InsertNeeds(umap_needs, input, div);
+// 				std::pair<std::unordered_map<std::string, size_t>::iterator,bool> ret;
+// 				if (input.second == "ORE") {
+// 					ore_counter += div * input.first;
+// 				}
+// 				else {
+// 					ret = umap_needs.insert(std::pair<std::string, size_t>(input.second, div * input.first));
+// 					if (ret.second == false) {
+// 						umap_needs[input.second] += div * input.first;
+// 					}
+// 				}
 			}
-			m_needings.erase(it_reactions->GetOutput().second);
+			umap_needs.erase(it_reactions->GetOutput().second);
 		}
 	}
 
