@@ -36,6 +36,6 @@ BUILD
 Build
 bUILD
 
-.vs
+.vs*
 *.kdev*
 
