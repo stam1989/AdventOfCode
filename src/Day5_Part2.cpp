@@ -172,6 +172,7 @@ bool Operation(std::vector<int>& opcodes)
 		}
 
 	}
+	return false;
 }
 
 void PrintOpcodes(std::vector<int>& opcodes)

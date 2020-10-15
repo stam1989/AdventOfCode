@@ -201,6 +201,7 @@ int Operation(std::vector<int> opcodes, std::future<int>& f_input, int phase_set
 		}
 		}
 	}
+	return false;
 }
 
 
