@@ -132,7 +132,7 @@ void SetMode(std::vector<int64_t>& opcodes, std::vector<int>& param_modes, int64
 }
 
 
-void DrawTile(std::vector<int>& output, Tiles& tiles)
+Tiles DrawTile(std::vector<int>& output, Tiles tiles)
 {
     std::string id;
     switch(output[2])
@@ -170,6 +170,7 @@ void DrawTile(std::vector<int>& output, Tiles& tiles)
 
     tiles.emplace_back(Tile(output[1], output[0], id));
     output.clear();
+    return tiles;
 }
 
 
@@ -278,16 +279,13 @@ void Operation(std::vector<int64_t> opcodes, std::vector<int>& output, Tiles& ti
                     {
                         score_counter++;
                         std::cout << "score_counter: " << score_counter << std::endl;
-                        if (score_counter == 3)
-                        {
-                            score = output[2];
-                            std::cout << "score: " << score << std::endl;
-                            ip += 2;
-                            score_counter = 0;
-                            break;
-                        }
+                        score += output[2];
+                        std::cout << "score: " << score << std::endl;
+                        ip += 2;
+                        score_counter = 0;
+                        break;
                     }
-                    DrawTile(output, tiles);
+                    tiles = DrawTile(output, tiles);
                 }
 
                 ip += 2;
@@ -383,7 +381,7 @@ int main(int argc, char* argv[])
     try
     {
         std::vector<int64_t> opcodes;
-        std::string filename("../../../resources/Day13.txt");
+        std::string filename("/home/neo/workspace/AdventOfCode/resources/Day13.txt");
 
         InitializingMemory(opcodes, filename);
         opcodes.resize(3946333, 0);  // fill the rest of theopcode vector with zeros
