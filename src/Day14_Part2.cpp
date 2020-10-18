@@ -18,7 +18,6 @@
 #include <exception>
 #include <algorithm>
 #include<iterator>
-#include <assert.h>
 
 #include <iostream>
 
@@ -27,12 +26,12 @@ using ReactInput = std::vector<std::pair<size_t, std::string>>;
 using ReactOutput = std::pair<size_t, std::string>;
 
 static uint32_t s_AllocCount = 0;
-static const char* filename = "../../../resources/Day14.txt";
+static const char* filename = "../resources/Day14.txt";
 
 void* operator new(size_t s)
 {
     s_AllocCount++;
-    //     std::cout << "Allocating " << s << std::endl;
+//     std::cout << "Allocating " << s << std::endl;
     return malloc(s);
 }
 
@@ -40,11 +39,12 @@ class Reaction {
 public:
     Reaction() = default;
     Reaction( ReactInput& in,  ReactOutput& out)
-    : input(in), output(out) {}
-    Reaction( ReactInput&& in,  ReactOutput&& out)
-    : input(std::move(in)), output(std::move(out)) {}
+        : input(in), output(out) {}
+        Reaction( ReactInput&& in,  ReactOutput&& out)
+        : input(std::move(in)), output(std::move(out)) {}
 
     Reaction(const Reaction& r) : input(r.input), output(r.output) {}
+//     Reaction(const Reaction&& r) : input(r.input), output(r.output) { std::cout << "Moved\n"; }
 
     bool operator=(Reaction& r){
         return input == r.input && output == r.output;
@@ -53,8 +53,8 @@ public:
         return input == r.input && output == r.output;
     }
 
-    const ReactInput GetInput() { return input;}
-    const ReactOutput GetOutput() { return output;}
+    ReactInput GetInput() { return input;}
+    ReactOutput GetOutput() { return output;}
 
 private:
     ReactInput input;
@@ -94,19 +94,19 @@ ReactInput MakeInput(std::string& str_inputChems) {
 
 Reaction DecodeReaction(std::string& s) {
 
-    const std::string delimiter1("=>");
+	const std::string delimiter1("=>");
 
     size_t pos = 0;
     ReactInput v_input;
     std::string str_inputChems;
-    while ((pos = s.find(delimiter1)) != std::string::npos) {
+	while ((pos = s.find(delimiter1)) != std::string::npos) {
         str_inputChems = s.substr(0, pos);
         v_input = MakeInput(str_inputChems);
 
         s.erase(0, pos + delimiter1.length());
-    }
+	}
 
-    ReactOutput p_output(MakeOutput(s));
+	ReactOutput p_output(MakeOutput(s));
 
     return Reaction(v_input, p_output);
 }
@@ -119,11 +119,11 @@ void Decode(std::string s_reaction) {
 
 void ReadFile(std::vector<Reaction>& v_reactions)
 {
-//     std::cout << "ReadFile starts\n";
+    std::cout << "ReadFile starts\n";
 
     std::ifstream input(filename);
     std::string s_reaction;
-
+	
     if (input.is_open())
     {
         while (std::getline(input, s_reaction))
@@ -140,65 +140,60 @@ void ReadFile(std::vector<Reaction>& v_reactions)
         throw std::runtime_error(exception_string);
     }
 
-//     std::cout << "ReadFile finished\n";
+    std::cout << "ReadFile finished\n";
 }
 
-void InsertNeeds(std::map<std::string, size_t>& m_needs,
-                   const std::pair<size_t, std::string>& input,
-                 const size_t& div, size_t& available_ores) {
+size_t InsertNeeds(std::map<std::string, size_t>& umap_needs,
+                 const std::pair<size_t, std::string>& input, const size_t& div) {
+    size_t oreCounter = 0;
     std::pair<std::map<std::string, size_t>::iterator,bool> ret;
 
     if (input.second == "ORE") {
-        size_t ores = div * input.first;
-        available_ores -= ores;
-        if (available_ores < 0)
-            std::cout<< "Problem!\n";
-        assert(available_ores >= 0);
+        oreCounter += div * input.first;
     }
     else {
-        ret = m_needs.insert(std::pair<std::string, size_t>(input.second, div * input.first));
+        ret = umap_needs.insert(std::pair<std::string, size_t>(input.second, div * input.first));
         if (ret.second == false) {
-            m_needs[input.second] += div * input.first;
+            umap_needs[input.second] += div * input.first;
         }
     }
+    return oreCounter;
 }
 
 
-bool CheckLeftovers(std::map<std::string, size_t>& m_needs,
-                std::map<std::string, size_t>& m_leftovers,
-                const size_t element_count, const std::string& element_name) {
+void CheckLeftovers(std::map<std::string, size_t>& umap_needs,
+                    std::map<std::string, size_t>& umap_leftovers,
+                    const size_t element_count, const std::string& element_name
+                   ) {
 
-    auto it_leftovers = m_leftovers.find(element_name);
+    auto it_leftovers = umap_leftovers.find(element_name);
 
-    if (it_leftovers != m_leftovers.end())
+    if (it_leftovers != umap_leftovers.end())
     {
         if (it_leftovers->second > element_count) {
             it_leftovers->second -= element_count;
-            m_needs.erase(element_name);
-            return true;
+            umap_needs.erase(element_name);
         }
 
         if (it_leftovers->second == element_count) {
-            m_leftovers.erase(it_leftovers->first);
-            m_needs.erase(element_name);
-            return true;
+            umap_leftovers.erase(it_leftovers->first);
+            umap_needs.erase(element_name);
         }
     }
-    return false;
 }
 
 
 bool IsNextToDelete(size_t& element_count, const std::string& element_name,
-                const size_t reactionElement_count,
-                std::map<std::string, size_t>& m_leftovers) {
+                    const size_t reactionElement_count,
+                    std::map<std::string, size_t>& umap_leftovers) {
 
     size_t mod = element_count % reactionElement_count;
     if (mod == 0) {
         return true;
     }
 
-    auto it_leftovers = m_leftovers.find(element_name);
-    if (element_count > reactionElement_count && it_leftovers != m_leftovers.end()) {
+    auto it_leftovers = umap_leftovers.find(element_name);
+    if (element_count > reactionElement_count && it_leftovers != umap_leftovers.end()) {
         if (it_leftovers->second > mod) {
             it_leftovers->second -= mod;
             element_count -= mod;
@@ -206,7 +201,7 @@ bool IsNextToDelete(size_t& element_count, const std::string& element_name,
         }
 
         if (it_leftovers->second == mod) {
-            m_leftovers.erase(it_leftovers);
+            umap_leftovers.erase(it_leftovers);
             element_count -= mod;
             return true;
         }
@@ -218,28 +213,30 @@ bool IsNextToDelete(size_t& element_count, const std::string& element_name,
 }
 
 
-bool CalcOres(std::map<std::string, size_t>& m_needs, std::vector<Reaction>& v_reactions,
-                size_t& available_ores, std::map<std::string, size_t>& m_leftovers) {
+bool CalcOres(std::map<std::string, size_t>& umap_needs, std::vector<Reaction>& v_reactions,
+              size_t& oreCounter, std::map<std::string, size_t>& umap_leftovers) {
     bool check_changes = false;
-    std::map<std::string, size_t> temp_needs(m_needs);
+    std::map<std::string, size_t> temp_needs(umap_needs);
     for (auto it_needs = temp_needs.begin(); it_needs != temp_needs.end(); it_needs++) {
 
         std::string element_name = it_needs->first;
         size_t element_count = it_needs->second;
-        auto it_leftovers = m_leftovers.find(element_name);
+        auto it_leftovers = umap_leftovers.find(element_name);
 
-        check_changes = CheckLeftovers(m_needs, m_leftovers, element_count, element_name);
+        CheckLeftovers(umap_needs, umap_leftovers, element_count, element_name);
 
         auto it_reactions = std::find_if(v_reactions.begin(), v_reactions.end(), [&](Reaction& r) {
             return (r.GetOutput().second == element_name); });
 
         if ((it_reactions != v_reactions.end()) &&
-            IsNextToDelete(element_count, element_name, it_reactions->GetOutput().first, m_leftovers)) {
+            IsNextToDelete(element_count, element_name, it_reactions->GetOutput().first, umap_leftovers)) {
             size_t div = element_count / it_reactions->GetOutput().first;
-        for (auto& input: it_reactions->GetInput()) {
-            InsertNeeds(m_needs, input, div, available_ores); }
-        m_needs.erase(element_name);
-        check_changes = true;
+            for (auto& input: it_reactions->GetInput()) {
+                oreCounter += InsertNeeds(umap_needs, input, div);
+            }
+            umap_needs.erase(element_name);
+            check_changes = true;
+            break;
         }
     }
 
@@ -247,71 +244,76 @@ bool CalcOres(std::map<std::string, size_t>& m_needs, std::vector<Reaction>& v_r
 }
 
 
-void InsertLeftovers(const size_t& leftovers, std::map<std::string, size_t>& m_leftovers,
-                    const std::map<std::string, size_t>::iterator& it_needs) {
+void InsertLeftovers(const size_t& leftovers, std::map<std::string, size_t>& umap_leftovers,
+                     const std::map<std::string, size_t>::iterator& it_needs) {
     std::pair<std::map<std::string, size_t>::iterator,bool> ret_leftovers;
-    ret_leftovers = m_leftovers.insert(std::pair<std::string, size_t>(it_needs->first, leftovers));
+    ret_leftovers = umap_leftovers.insert(std::pair<std::string, size_t>(it_needs->first, leftovers));
     if (ret_leftovers.second == false) {
-        m_leftovers[it_needs->first] += leftovers;
+        umap_leftovers[it_needs->first] += leftovers;
     }
 }
 
-void InitNeeds(std::vector<Reaction>& v_reactions, std::map<std::string, size_t>& m_needs) {
-    auto it = std::find_if(v_reactions.begin(), v_reactions.end(), [](Reaction& r) {
-        return (r.GetOutput().second == "FUEL");
-    });
+size_t OreRequired(std::vector<Reaction>& v_reactions, size_t fuelCount)
+{
+    std::map<std::string, size_t> umap_needs, umap_leftovers;
+    umap_needs.emplace("FUEL", fuelCount);
 
-    for (const auto& in: it->GetInput()) {
-        m_needs.emplace(in.second, in.first);
-    }
+	size_t oreCounter = 0;
 
+	while (!umap_needs.empty()) {
+		if (!CalcOres(umap_needs, v_reactions, oreCounter, umap_leftovers)) {
+			auto it_reactions = std::find_if(v_reactions.begin(), v_reactions.end(), [&](Reaction& r) {
+				return (r.GetOutput().second == umap_needs.begin()->first); });
+			size_t div = (umap_needs.begin()->second / it_reactions->GetOutput().first) + 1;
+            size_t leftovers = (div * it_reactions->GetOutput().first) - umap_needs.begin()->second;
+
+            InsertLeftovers(leftovers, umap_leftovers, umap_needs.begin());
+
+			for (auto& input: it_reactions->GetInput()) {
+                oreCounter += InsertNeeds(umap_needs, input, div);
+			}
+			umap_needs.erase(it_reactions->GetOutput().second);
+		}
+	}
+
+    return oreCounter;
 }
 
 int main() {
-    std::vector<Reaction> v_reactions;
-    ReadFile(v_reactions);
+	std::vector<Reaction> v_reactions;
+	ReadFile(v_reactions);
 
-    size_t available_ores = 1000000000000;
-    size_t fuel_counter = 0;
-//     bool exit_flag = false;
-    std::map<std::string, size_t> m_leftovers;
 
-    while (available_ores > 0/* && !exit_flag*/) {
-//     exit_flag = true;
-    std::map<std::string, size_t> m_needs;
-//     std::cout << "Leftovers:\n";
-//     for (auto it = m_leftovers.begin(); it != m_leftovers.end(); it++)
-//         std::cout << it->first << ": " << it->second << ", ";
-//     std::cout << "\n\n\nStarts!!\n";
-    InitNeeds(v_reactions, m_needs);
-        while (!m_needs.empty()) {
-            if (!CalcOres(m_needs, v_reactions, available_ores, m_leftovers)) {
-                auto it_reactions = std::find_if(v_reactions.begin(), v_reactions.end(), [&](Reaction& r) {
-                    return (r.GetOutput().second == m_needs.begin()->first); });
-                size_t div = (m_needs.begin()->second / it_reactions->GetOutput().first) + 1;
-                size_t leftovers = (div * it_reactions->GetOutput().first) - m_needs.begin()->second;
+    size_t availableOres = 1000000000000;
+    size_t low = availableOres / OreRequired(v_reactions, 1);
+    size_t high = low * 10;
 
-                InsertLeftovers(leftovers, m_leftovers, m_needs.begin());
-
-                for (auto& input: it_reactions->GetInput()) {
-                    InsertNeeds(m_needs, input, div, available_ores);
-                }
-                m_needs.erase(it_reactions->GetOutput().second);
-            }
-        }
-
-        fuel_counter += 1;
-        if (m_leftovers.empty()) {
-            std::cout << "fuel_counter: " << fuel_counter << ", available_ores: " << available_ores << std::endl;
-            break;
-        }
-//         std::cout << "We produce " << fuel_counter << " FUEL!\n";
-//         std::cout << "\n Finishes!!\n\n\n";
-
+    while(OreRequired(v_reactions, high) < availableOres)
+    {
+        low = high;
+        high *= 10;
     }
 
-    std::cout << "We produce " << fuel_counter << " FUEL!\n";
+    while(low < high - 1)
+    {
+        size_t mid = (high + low) / 2;
+        size_t oreCounter = OreRequired(v_reactions, mid);
 
-    std::cout << "Allocate " << s_AllocCount << " times\n";
+        std::cout << "high: " << high << ", low: " << low << ", fuel: " << mid << ", oreCounter: " << oreCounter << "\n\n";
+        if (oreCounter < availableOres)
+        {
+            low = mid;
+        }
+        else if (oreCounter > availableOres)
+        {
+            high = mid;
+        }
+        else 
+        {
+            std::cout << "We produce " << mid << " fuel\n";
+            break;
+        }
+    }
+
     return 0;
 }
