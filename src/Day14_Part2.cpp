@@ -17,10 +17,10 @@
 #include <vector>
 #include <exception>
 #include <algorithm>
-#include<iterator>
+#include <iterator>
+#include <chrono>
 
 #include <iostream>
-
 
 using ReactInput = std::vector<std::pair<size_t, std::string>>;
 using ReactOutput = std::pair<size_t, std::string>;
@@ -28,12 +28,44 @@ using ReactOutput = std::pair<size_t, std::string>;
 static uint32_t s_AllocCount = 0;
 static const char* filename = "../resources/Day14.txt";
 
+
+class Timer
+{
+public:
+    Timer()
+    {
+        m_StartTimepoint = std::chrono::high_resolution_clock::now();
+    }
+
+    ~Timer()
+    {
+        Stop();
+    }
+
+    void Stop()
+    {
+        auto endTimepoint = std::chrono::high_resolution_clock::now();
+
+        auto start = std::chrono::time_point_cast<std::chrono::microseconds>(m_StartTimepoint).time_since_epoch().count();
+        auto end = std::chrono::time_point_cast<std::chrono::microseconds>(endTimepoint).time_since_epoch().count();
+
+        auto duration = end - start;
+        double ms = duration * 0.001;
+        
+        std::cout << "Duration: " << duration << "us (" << ms << "ms)\n";
+    }
+private:
+    std::chrono::time_point<std::chrono::high_resolution_clock> m_StartTimepoint;
+};
+
+
 void* operator new(size_t s)
 {
     s_AllocCount++;
 //     std::cout << "Allocating " << s << std::endl;
     return malloc(s);
 }
+
 
 class Reaction {
 public:
@@ -119,7 +151,7 @@ void Decode(std::string s_reaction) {
 
 void ReadFile(std::vector<Reaction>& v_reactions)
 {
-    std::cout << "ReadFile starts\n";
+    // std::cout << "ReadFile starts\n";
 
     std::ifstream input(filename);
     std::string s_reaction;
@@ -140,7 +172,7 @@ void ReadFile(std::vector<Reaction>& v_reactions)
         throw std::runtime_error(exception_string);
     }
 
-    std::cout << "ReadFile finished\n";
+    // std::cout << "ReadFile finished\n";
 }
 
 size_t InsertNeeds(std::map<std::string, size_t>& umap_needs,
@@ -279,27 +311,29 @@ size_t OreRequired(std::vector<Reaction>& v_reactions, size_t fuelCount)
     return oreCounter;
 }
 
-int main() {
-	std::vector<Reaction> v_reactions;
-	ReadFile(v_reactions);
 
-
-    size_t availableOres = 1000000000000;
+std::tuple<size_t, size_t> SetBorders(std::vector<Reaction>& v_reactions, size_t availableOres)
+{
+    
     size_t low = availableOres / OreRequired(v_reactions, 1);
     size_t high = low * 10;
-
     while(OreRequired(v_reactions, high) < availableOres)
     {
         low = high;
         high *= 10;
     }
+    return {low, high};
+}
 
+
+size_t CalcProducedFuel(size_t low, size_t high, size_t availableOres, std::vector<Reaction>& v_reactions)
+{
+    size_t mid = 0;
     while(low < high - 1)
     {
-        size_t mid = (high + low) / 2;
+        mid = (high + low) / 2;
         size_t oreCounter = OreRequired(v_reactions, mid);
 
-        std::cout << "high: " << high << ", low: " << low << ", fuel: " << mid << ", oreCounter: " << oreCounter << "\n\n";
         if (oreCounter < availableOres)
         {
             low = mid;
@@ -310,9 +344,26 @@ int main() {
         }
         else 
         {
-            std::cout << "We produce " << mid << " fuel\n";
             break;
         }
+    }
+    return mid;
+}
+
+int main() {
+    {
+        Timer t;
+
+        std::vector<Reaction> v_reactions;
+        ReadFile(v_reactions);
+
+        size_t availableOres = 1000000000000;
+
+        auto[low, high] = SetBorders(v_reactions, availableOres);
+
+        size_t fuel = CalcProducedFuel(low, high, availableOres, v_reactions);
+    
+        std::cout << "We produce " << fuel << " fuel\n";
     }
 
     return 0;
