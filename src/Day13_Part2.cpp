@@ -16,13 +16,15 @@
 #include <csignal>
 #include <cstdint>
 #include <vector>
+#include <array>
+#include <map>
+#include <utility>
 
 
-
-typedef std::vector<std::vector<std::string>> Panel;
-static constexpr int ROW = 30;
+static constexpr int ROW = 23;
 static constexpr int COLUMN = 50;
-
+using Panel = std::array<std::array<std::string, COLUMN>, ROW>;
+using Tiles = std::map<std::pair<size_t, size_t>, std::string>;
 
 
 enum OpCode
@@ -59,20 +61,8 @@ enum Joystick
     Right = 1
 };
 
-struct Tile
-{
-    Tile() : x(0), y(0), id("  ") {}
-    Tile(int x_input, int y_input, std::string id_input) : x(x_input), y(y_input), id(id_input) {}
-    Tile(const Tile& t) : x(t.x), y(t.y), id(t.id) {}
 
-    int x, y;
-    std::string id;
-};
-
-typedef std::vector<Tile> Tiles;
-
-
-void InitializingMemory(std::vector<int64_t>& opcodes, std::string& filename)
+void InitializingMemory(std::vector<int64_t>& opcodes, const char* filename)
 {
     std::cout << "InitializingMemory starts\n";
 
@@ -132,7 +122,7 @@ void SetMode(std::vector<int64_t>& opcodes, std::vector<int>& param_modes, int64
 }
 
 
-Tiles DrawTile(std::vector<int>& output, Tiles tiles)
+void DrawTile(std::vector<int>& output, Tiles& tiles)
 {
     std::string id;
     switch(output[2])
@@ -168,15 +158,20 @@ Tiles DrawTile(std::vector<int>& output, Tiles tiles)
         }
     }
 
-    tiles.emplace_back(Tile(output[1], output[0], id));
+    auto ret = tiles.insert(std::make_pair(std::make_pair(output[1], output[0]), id));
+
+     if (ret.second == false)
+     {
+         throw std::runtime_error("DrawTile:: Could not add in tiles...\n");
+     }
+
     output.clear();
-    return tiles;
 }
 
 
 void PrintPanel(const Panel &panel)
 {
-    std::cout << "PrintPanel starts \n";
+    // std::cout << "PrintPanel starts \n";
 
     for(auto& p : panel)
     {
@@ -186,7 +181,7 @@ void PrintPanel(const Panel &panel)
         }
         std::cout << std::endl;
     }
-    std::cout << "PrintPanel finished \n";
+    // std::cout << "PrintPanel finished \n";
 }
 
 
@@ -194,34 +189,56 @@ void DrawPanel(Panel &panel, const Tiles& tiles)
 {
     for (const auto& t : tiles)
     {
-        panel[t.x][t.y] = t.id;
+        panel[t.first.first][t.first.second] = t.second;
     }
 }
 
 
 int MoveJoystick(const Tiles& tiles)
 {
-    std::cout << "MoveJoystick starts!" << std::endl;
-    auto it_ball = std::find_if(tiles.begin(), tiles.end(), [](const Tile& t) { return t.id == "()"; });
-    auto it_paddle = std::find_if(tiles.begin(), tiles.end(), [](const Tile& t) { return t.id == "=="; });
+    // std::cout << "MoveJoystick starts!" << std::endl;
 
-    if (it_ball->x < it_paddle->x)
+    auto it_ball = tiles.begin();
+    for(it_ball; it_ball != tiles.end(); it_ball++)
+    {
+        if(it_ball->second == "()")
+        {
+            break;
+        }
+    }
+
+    auto it_paddle = tiles.begin();
+    for(it_paddle; it_paddle != tiles.end(); it_paddle++)
+    {
+        if(it_paddle->second == "==")
+        {
+            break;
+        }
+    }
+
+
+    if (it_ball->first.first < it_paddle->first.first)
     {
         return -1;
     }
-    else if (it_ball->x > it_paddle->x)
+    else if (it_ball->first.first > it_paddle->first.first)
     {
         return 1;
     }
-    else
+    else if (it_ball->first.first == it_paddle->first.first)
     {
         return 0;
     }
+    else
+    {
+        throw std::runtime_error("MoveJoystick::Undefined behavior...");
+    }
+    
 
 }
 
 
-void Operation(std::vector<int64_t> opcodes, std::vector<int>& output, Tiles& tiles, uint8_t& score_counter, uint64_t& score)
+void Operation(std::vector<int64_t> opcodes, std::vector<int>& output, Tiles& tiles, size_t& score)
 {
     int ip = 0, relative_base = 0;
     bool cont = true;
@@ -277,15 +294,11 @@ void Operation(std::vector<int64_t> opcodes, std::vector<int>& output, Tiles& ti
                 {
                     if (output[0] == -1 && output[1] == 0)
                     {
-                        score_counter++;
-                        std::cout << "score_counter: " << score_counter << std::endl;
-                        score += output[2];
-                        std::cout << "score: " << score << std::endl;
+                        score = output[2];
                         ip += 2;
-                        score_counter = 0;
                         break;
                     }
-                    tiles = DrawTile(output, tiles);
+                    DrawTile(output, tiles);
                 }
 
                 ip += 2;
@@ -381,28 +394,44 @@ int main(int argc, char* argv[])
     try
     {
         std::vector<int64_t> opcodes;
-        std::string filename("/home/neo/workspace/AdventOfCode/resources/Day13.txt");
+        const char* filename("../resources/Day13.txt");
 
         InitializingMemory(opcodes, filename);
         opcodes.resize(3946333, 0);  // fill the rest of theopcode vector with zeros
         opcodes[0] = 2; // set first mem address to 2 to play for free
 
-        Panel panel(ROW, std::vector<std::string>(COLUMN, "  "));
+        // Panel panel(ROW, std::vector<std::string>(COLUMN, "  "));
+
+        Panel panel;
+        for (size_t col = 0; col < COLUMN; col++)
+        {
+            for (size_t row = 0; row< ROW; row++)
+            {
+                panel[row][col] = "  ";
+            }
+        }
+
         Tiles tiles;
         std::vector<int> output;
-        uint8_t score_counter = 0;
-        uint64_t score = 0;
+        size_t score = 0;
 
         while(1)
         {
 
-            Operation(opcodes, output, tiles, score_counter, score);
+            Operation(opcodes, output, tiles, score);
             DrawPanel(panel, tiles);
             PrintPanel(panel);
 
-            auto count_blocks = std::count_if(tiles.begin(), tiles.end(), [](const Tile& t) { return t.id == "**"; });
-            std::cout << "count_blocks: " << count_blocks << std::endl;
-            std::cout << "Score: " << score << std::endl;
+            std::cout << "-----00" << score << "-----\n\n\n";
+
+            size_t count_blocks = 0;
+            for (auto& tile : tiles)
+            {
+                if (tile.second == "**")
+                {
+                    count_blocks++;
+                }
+            }
 
             if (count_blocks == 0)
             {
