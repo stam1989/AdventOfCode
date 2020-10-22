@@ -19,12 +19,11 @@
 #include <array>
 #include <map>
 #include <utility>
+#include <assert>
 
-
-static constexpr int ROW = 23;
-static constexpr int COLUMN = 50;
+static constexpr int ROW = 80;
+static constexpr int COLUMN = 80;
 using Panel = std::array<std::array<std::string, COLUMN>, ROW>;
-using Tiles = std::map<std::pair<size_t, size_t>, std::string>;
 
 
 enum OpCode
@@ -32,7 +31,7 @@ enum OpCode
     OP_ADD = 1, // adds together numbers read from two positions and stores the result in a third position
     OP_MUL = 2, // multiplies together numbers read from two positions and stores the result in a third position
     OP_IN = 3,  // takes a single integer as input and saves it to the position given by its only parameter
-    OP_OUT = 4, // outputs the value of its only parameter
+    OP_OUT = 4, // outputs the value of its only parametera
     OP_JUMP_IF_TRUE = 5,  // if the first parameter is non-zero, it sets the instruction pointer to the value from the second parameter. Otherwise, it does nothing.
     OP_JUMP_IF_FALSE = 6, // if the first parameter is zero, it sets the instruction pointer to the value from the second parameter. Otherwise, it does nothing.
     OP_LESS_THAN = 7, // if the first parameter is less than the second parameter, it stores 1 in the position given by the third parameter. Otherwise, it stores 0.
@@ -45,20 +44,12 @@ enum OpCode
 /// 0 == position mode
 
 
-enum TileId
+enum Direction
 {
-    Empty = 0,          // No game object appears in this tile ('  ')
-    Wall,               // Walls are indestructible barriers ('##')
-    Block,              // Blocks can be broken by the ball ('**')
-    HorizontalPaddle,   // The paddle is indestructible ('==')
-    Ball                // The ball moves diagonally and bounces off objects ('()')
-};
-
-enum Joystick
-{
-    Left = -1,
-    Neutral = 0,
-    Right = 1
+    NORTH = 1,
+    SOUTH = 2,
+    WEST = 3,
+    EAST = 4
 };
 
 
@@ -74,7 +65,7 @@ void InitializingMemory(std::vector<int64_t>& opcodes, const char* filename)
     {
         while (std::getline(input, code, ','))
         {
-            opcodes.emplace_back(stoll(code, nullptr, 10));
+            opcodes.push_back(stoll(code, nullptr, 10));
         }
         input.close();
     }
@@ -122,123 +113,59 @@ void SetMode(std::vector<int64_t>& opcodes, std::vector<int>& param_modes, int64
 }
 
 
-void DrawTile(std::vector<int>& output, Tiles& tiles)
+struct Droid
 {
-    std::string id;
-    switch(output[2])
+    size_t x, y;
+    std::pair<size_t, size_t> previousLocation;
+    std::vector<std::pair<size_t, size_t>, std::string>> adjacent;
+};
+
+void SetPrevLocation(Droid& droid)
+{
+    droid.previousLocation.first = droid.x;
+    droid.previousLocation.second = droid.y;
+}
+
+void Move(const Direction& dir, Droid& droid)
+{
+    SetPrevLocation(droid);
+
+    switch (static_cast<uint8_t>(dir))
     {
-        case Empty:
-        {
-            id = "  ";
+        case NORTH:
+            droid.y += 1;
             break;
-        }
-        case Wall:
-        {
-            id = "##";
+        case SOUTH:
+            droid.y -= 1;
             break;
-        }
-        case Block:
-        {
-            id = "**";
+        case WEST:
+            droid.x -= 1;
             break;
-        }
-        case HorizontalPaddle:
-        {
-            id = "==";
+        case EAST:
+            droid.x += 1;
             break;
-        }
-        case Ball:
-        {
-            id = "()";
-            break;
-        }
         default:
-        {
-            throw std::runtime_error("Wrong tile id!!!!\n ");
-        }
+            throw std::exception("invalid move...");
     }
-
-    auto ret = tiles.insert(std::make_pair(std::make_pair(output[1], output[0]), id));
-
-     if (ret.second == false)
-     {
-         throw std::runtime_error("DrawTile:: Could not add in tiles...\n");
-     }
-
-    output.clear();
 }
 
 
-void PrintPanel(const Panel &panel)
+void MoveDroid(Panel& panel, Droid droid)
 {
-    // std::cout << "PrintPanel starts \n";
-
-    for(auto& p : panel)
+    if (droid.adjacent.empty())
     {
-        for (auto& spot : p)
-        {
-            std::cout << spot;
-        }
-        std::cout << std::endl;
-    }
-    // std::cout << "PrintPanel finished \n";
-}
-
-
-void DrawPanel(Panel &panel, const Tiles& tiles)
-{
-    for (const auto& t : tiles)
-    {
-        panel[t.first.first][t.first.second] = t.second;
-    }
-}
-
-
-int MoveJoystick(const Tiles& tiles)
-{
-    // std::cout << "MoveJoystick starts!" << std::endl;
-
-    auto it_ball = tiles.begin();
-    for(it_ball; it_ball != tiles.end(); it_ball++)
-    {
-        if(it_ball->second == "()")
-        {
-            break;
-        }
+        Move(Direction::NORTH, droid);
+        return;
     }
 
-    auto it_paddle = tiles.begin();
-    for(it_paddle; it_paddle != tiles.end(); it_paddle++)
+    for(auto& adj : droid.adjacent)
     {
-        if(it_paddle->second == "==")
-        {
-            break;
-        }
+        
     }
-
-
-    if (it_ball->first.first < it_paddle->first.first)
-    {
-        return -1;
-    }
-    else if (it_ball->first.first > it_paddle->first.first)
-    {
-        return 1;
-    }
-    else if (it_ball->first.first == it_paddle->first.first)
-    {
-        return 0;
-    }
-    else
-    {
-        throw std::runtime_error("MoveJoystick::Undefined behavior...");
-    }
-    
 
 }
 
-
-void Operation(std::vector<int64_t> opcodes, std::vector<int>& output, Tiles& tiles, size_t& score)
+void Operation(std::vector<int64_t>& opcodes, size_t& score)
 {
     int ip = 0, relative_base = 0;
     bool cont = true;
@@ -279,27 +206,14 @@ void Operation(std::vector<int64_t> opcodes, std::vector<int>& output, Tiles& ti
                 long pos;
                 pos = (param_modes[0] == 0) ? opcodes[ip + 1] : ((param_modes[0] == 1) ? ip + 1 : opcodes[ip + 1] + relative_base);
 
-                opcodes[pos] = MoveJoystick(tiles);
+                // opcodes[pos] = MoveJoystick(tiles);
                 ip += 2;
                 break;
             }
             case OP_OUT:
             {
-
                 long arg1 = (param_modes[0] == 0) ? opcodes[opcodes[ip + 1]] : ((param_modes[0] == 1) ? opcodes[ip + 1] : opcodes[opcodes[ip + 1] + relative_base]);
-
-                output.emplace_back(arg1);
-
-                if (output.size() == 3)
-                {
-                    if (output[0] == -1 && output[1] == 0)
-                    {
-                        score = output[2];
-                        ip += 2;
-                        break;
-                    }
-                    DrawTile(output, tiles);
-                }
+                // std::cout << "output: " << arg1 << std::endl;
 
                 ip += 2;
                 break;
@@ -389,56 +303,41 @@ void PrintOpcodes(std::vector<int64_t>& opcodes)
 }
 
 
+void PrintPanel(const Panel &panel)
+{
+    // std::cout << "PrintPanel starts \n";
+
+    for(auto& p : panel)
+    {
+        for (auto& spot : p)
+        {
+            std::cout << spot;
+        }
+        std::cout << std::endl;
+    }
+    // std::cout << "PrintPanel finished \n";
+}
+
+
 int main(int argc, char* argv[])
 {
     try
     {
         std::vector<int64_t> opcodes;
-        const char* filename("../resources/Day13.txt");
+        const char* filename("../resources/Day15.txt");
 
         InitializingMemory(opcodes, filename);
-
-        // opcodes.resize(3946333, 0);  // fill the rest of the opcode vector with zeros
-        opcodes[0] = 2; // set first mem address to 2 to play for free
-
-        // Panel panel(ROW, std::vector<std::string>(COLUMN, "  "));
 
         Panel panel;
         for (size_t col = 0; col < COLUMN; col++)
         {
             for (size_t row = 0; row< ROW; row++)
             {
-                panel[row][col] = "  ";
+                panel[row][col] = " ";
             }
         }
-
-        Tiles tiles;
-        std::vector<int> output;
-        size_t score = 0;
-
-        while(1)
-        {
-            Operation(opcodes, output, tiles, score);
-            DrawPanel(panel, tiles);
-            PrintPanel(panel);
-
-            std::cout << "-----00" << score << "-----\n\n\n";
-
-            size_t count_blocks = 0;
-            for (auto& tile : tiles)
-            {
-                if (tile.second == "**")
-                {
-                    count_blocks++;
-                }
-            }
-
-            if (count_blocks == 0)
-            {
-                break;
-            }
-        }
-
+        panel[ROW / 2][COLUMN / 2] = "D";
+        PrintPanel(panel);
 
     }
     catch (std::string& exception_string)
