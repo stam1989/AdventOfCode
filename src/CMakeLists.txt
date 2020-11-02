@@ -1,3 +1,14 @@
+add_subdirectory(Intcode)
+
+add_library(Day15_Part1_lib
+    Day15/Day15_Part1.h
+    Day15/Day15_Part1.cpp)
+
+
+add_library(D15P1_main
+    Day15/main.cpp)
+
+
 add_executable(Day1_Part1 Day1_Part1.cpp)
 add_executable(Day1_Part2 Day1_Part2.cpp)
 add_executable(Day2_Part1 Day2_Part1.cpp)
@@ -23,4 +34,8 @@ add_executable(Day13_Part1 Day13_Part1.cpp)
 add_executable(Day13_Part2 Day13_Part2.cpp)
 add_executable(Day14_Part1 Day14_Part1.cpp)
 add_executable(Day14_Part2 Day14_Part2.cpp)
-add_executable(Day15_Part1 Day15_Part1.cpp)
+add_executable(Day15_Part1 Day15/main.cpp)
+# add_executable(Day15_Part1_2 Day15_Part1_2.cpp)
+
+
+target_link_libraries(Day15_Part1 PUBLIC IntcodeLib Day15_Part1_lib)

@@ -6,7 +6,7 @@
 // Description : Hello World in C++, Ansi-style
 //============================================================================
 
-#include "Intcode.cpp"
+#include "Intcode2.cpp"
 
 #include <memory>
 #include <iostream>
