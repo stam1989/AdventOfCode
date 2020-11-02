@@ -1,11 +1,11 @@
 add_subdirectory(Intcode)
 
-add_library(Day15_Part1_lib
-    Day15/Day15_Part1.h
-    Day15/Day15_Part1.cpp)
+add_library(Day15_lib
+    Day15/Day15.h
+    Day15/Day15.cpp)
 
 
-add_library(D15P1_main
+add_library(Day15_main
     Day15/main.cpp)
 
 
@@ -34,11 +34,10 @@ add_executable(Day13_Part1 Day13_Part1.cpp)
 add_executable(Day13_Part2 Day13_Part2.cpp)
 add_executable(Day14_Part1 Day14_Part1.cpp)
 add_executable(Day14_Part2 Day14_Part2.cpp)
-add_executable(Day15_Part1 Day15/main.cpp)
-# add_executable(Day15_Part1_2 Day15_Part1_2.cpp)
+add_executable(Day15 Day15/main.cpp)
 
 
-target_link_libraries(Day15_Part1 PUBLIC IntcodeLib Day15_Part1_lib)
+target_link_libraries(Day15 PUBLIC IntcodeLib Day15_lib)
 
-target_include_directories(Day15_Part1_lib PUBLIC ${CMAKE_CURRENT_LIST_DIR}/Intcode)
-target_include_directories(D15P1_main PUBLIC ${CMAKE_CURRENT_LIST_DIR}/Intcode)
+target_include_directories(Day15_lib PUBLIC ${CMAKE_CURRENT_LIST_DIR}/Intcode)
+target_include_directories(Day15_main PUBLIC ${CMAKE_CURRENT_LIST_DIR}/Intcode)

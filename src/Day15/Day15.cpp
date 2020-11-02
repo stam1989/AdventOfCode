@@ -6,7 +6,7 @@
 // Description : Hello World in C++, Ansi-style
 //============================================================================
 
-#include "Day15_Part1.h"
+#include "Day15.h"
 
 #include <iostream>
 #include <fstream>
@@ -250,12 +250,12 @@ bool Maze::OpOutput(int64_t status)
         
     }
 
-    PrintPanel();
+    // PrintPanel();
     return false;
 }
 
 
-std::pair<int, int> Maze::GetDestination()
+std::pair<int, int> Maze::GetOxygenPosition()
 {
     for(int y = 0; y < COLUMN; y++)
     {
@@ -304,5 +304,58 @@ void Maze::FindShortestPath(int cur_X, int cur_Y, std::pair<int, int> dest, int3
     if(it != m_Visited.end())
     {
         m_Visited.erase(it);
+    }
+}
+
+
+bool Maze::IsFullOfOxygen()
+{
+    for (int col = 0; col < COLUMN; col++)
+    {
+        for (int row = 0; row < ROW; row++)
+        {
+            if(m_Panel[col][row] == ".")
+                return false;
+        }
+    }
+
+    return true;
+}
+
+
+void Maze::FillAdjacent()
+{
+    Panel temp_Panel = m_Panel;
+    for (int col = 0; col < COLUMN; col++)
+    {
+        for (int row = 0; row < ROW; row++)
+        {
+            if(temp_Panel[col][row] == "O")
+            {
+                if(temp_Panel[col + 1][row] == ".")
+                    m_Panel[col + 1][row] = "O";
+                
+                if(temp_Panel[col - 1][row] == ".")
+                    m_Panel[col - 1][row] = "O";
+                
+                if(temp_Panel[col][row + 1] == ".")
+                    m_Panel[col][row + 1] = "O";
+                
+                if(temp_Panel[col][row - 1] == ".")
+                    m_Panel[col][row - 1] = "O";
+
+            }
+        }
+    }
+}
+
+
+void Maze::CaluclateTimeToFillOxygen(uint16_t& timeElapsed)
+{
+    FillAdjacent();
+    timeElapsed++;
+    if(!IsFullOfOxygen())
+    {
+        CaluclateTimeToFillOxygen(timeElapsed);
     }
 }

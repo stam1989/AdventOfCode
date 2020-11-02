@@ -100,7 +100,7 @@ private:
 
 // Shortest Path
 public:
-    std::pair<int, int> GetDestination();
+    std::pair<int, int> GetOxygenPosition();
 
     inline std::pair<int, int> GetStartPoint()
     {
@@ -108,6 +108,7 @@ public:
     }
 
     void FindShortestPath(int cur_X, int cur_Y, std::pair<int, int> dest, int32_t curDistance, int32_t& minDistance);
+
 
 // Shortest Path
 private:
@@ -136,6 +137,17 @@ private:
 // Shortest Path
 private:
     std::set<std::pair<int, int>> m_Visited;
-};
 
+
+// Part2 Fill with oxygen
+public:
+    void CaluclateTimeToFillOxygen(uint16_t& timeElapsed);
+
+
+// Part2 Fill with oxygen
+private:
+    bool IsFullOfOxygen();
+
+    void FillAdjacent();
+};
 #endif

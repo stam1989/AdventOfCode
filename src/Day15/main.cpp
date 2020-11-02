@@ -1,4 +1,4 @@
-#include "Day15_Part1.h"
+#include "Day15.h"
 
 #include <iostream>
 
@@ -13,13 +13,19 @@ int main(int argc, char* argv[])
 
         int32_t curDistance = 0;
         int32_t minDistance = INT32_MAX;
-        std::pair<int, int> dest = intcode_program.GetDestination();
+        std::pair<int, int> dest = intcode_program.GetOxygenPosition();
         int cur_X = intcode_program.GetStartPoint().first;
         int cur_Y = intcode_program.GetStartPoint().second;
         intcode_program.FindShortestPath(cur_X, cur_Y, dest, curDistance, minDistance);
         
         std::cout << "The shortest path to Oxygen is: " << minDistance << " !!\n";
 
+
+        uint16_t timeElapsed = 0;
+        intcode_program.CaluclateTimeToFillOxygen(timeElapsed);
+
+        intcode_program.PrintPanel();
+        std::cout << "it take " << timeElapsed << " minutes to fill with oxygen...\n";
     }
     catch (std::string& exception_string)
     {
