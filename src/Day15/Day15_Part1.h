@@ -9,7 +9,7 @@
 #ifndef DAY15_PART1_H
 #define DAY15_PART1_H
 
-#include "../Intcode/Intcode.h"
+#include "Intcode.h"
 
 #include <array>
 #include <stack>

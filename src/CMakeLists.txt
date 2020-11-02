@@ -39,3 +39,6 @@ add_executable(Day15_Part1 Day15/main.cpp)
 
 
 target_link_libraries(Day15_Part1 PUBLIC IntcodeLib Day15_Part1_lib)
+
+target_include_directories(Day15_Part1_lib PUBLIC ${CMAKE_CURRENT_LIST_DIR}/Intcode)
+target_include_directories(D15P1_main PUBLIC ${CMAKE_CURRENT_LIST_DIR}/Intcode)
