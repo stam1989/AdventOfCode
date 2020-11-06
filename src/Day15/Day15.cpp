@@ -20,7 +20,7 @@ void Maze::InializePanel()
     {
         for (size_t row = 0; row< ROW; row++)
         {
-                m_Panel[row][col] = "0";
+                m_Panel[row][col] = " ";
         }
     }
     m_Panel[COLUMN / 2][ROW / 2] = ".";     // Droid's start point 
@@ -64,22 +64,22 @@ void Maze::PrintPanel()
 
 uint8_t Maze::MoveToUnexplored()
 {
-    if((m_Droid.y + 1 < COLUMN) && (m_Panel[m_Droid.y + 1][m_Droid.x] == "0"))
+    if((m_Droid.y + 1 < COLUMN) && (m_Panel[m_Droid.y + 1][m_Droid.x] == " "))
     {
         return Direction::NORTH; 
     }
 
-    if((m_Droid.y + 1 >= 0) && (m_Panel[m_Droid.y - 1][m_Droid.x] == "0"))
+    if((m_Droid.y + 1 >= 0) && (m_Panel[m_Droid.y - 1][m_Droid.x] == " "))
     {
         return Direction::SOUTH; 
     }
     
-    if((m_Droid.x + 1 < ROW) && (m_Panel[m_Droid.y][m_Droid.x + 1] == "0"))
+    if((m_Droid.x + 1 < ROW) && (m_Panel[m_Droid.y][m_Droid.x + 1] == " "))
     {
         return Direction::WEST;
     }
 
-    if((m_Droid.x - 1 >= 0) && (m_Panel[m_Droid.y][m_Droid.x - 1] == "0"))
+    if((m_Droid.x - 1 >= 0) && (m_Panel[m_Droid.y][m_Droid.x - 1] == " "))
     {
         return Direction::EAST;
     }

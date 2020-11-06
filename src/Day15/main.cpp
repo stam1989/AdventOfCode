@@ -9,8 +9,10 @@ int main(int argc, char* argv[])
         const char* filename("../resources/Day15.txt");
         Maze intcode_program(filename);
 
+        // DFS
         intcode_program.Operation();
-
+        intcode_program.PrintPanel();
+        // Calculate Shortest Path to oxygen (Part 1)
         int32_t curDistance = 0;
         int32_t minDistance = INT32_MAX;
         std::pair<int, int> dest = intcode_program.GetOxygenPosition();
@@ -18,14 +20,14 @@ int main(int argc, char* argv[])
         int cur_Y = intcode_program.GetStartPoint().second;
         intcode_program.FindShortestPath(cur_X, cur_Y, dest, curDistance, minDistance);
         
-        std::cout << "The shortest path to Oxygen is: " << minDistance << " !!\n";
+        std::cout << "The shortest path to Oxygen is: " << minDistance << " steps!!\n";
 
-
+        // Calculate time to fill whole maze with oxygen (Part 2)
         uint16_t timeElapsed = 0;
         intcode_program.CaluclateTimeToFillOxygen(timeElapsed);
 
         intcode_program.PrintPanel();
-        std::cout << "it take " << timeElapsed << " minutes to fill with oxygen...\n";
+        std::cout << "It takes " << timeElapsed << " minutes to fill with oxygen...\n";
     }
     catch (std::string& exception_string)
     {

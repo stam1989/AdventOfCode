@@ -6,8 +6,8 @@
 // Description : Hello World in C++, Ansi-style
 //============================================================================
 
-#ifndef DAY15_PART1_H
-#define DAY15_PART1_H
+#ifndef DAY15_H
+#define DAY15_H
 
 #include "Intcode.h"
 
@@ -150,4 +150,6 @@ private:
 
     void FillAdjacent();
 };
+
+
 #endif
