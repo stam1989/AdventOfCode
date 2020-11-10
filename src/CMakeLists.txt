@@ -19,26 +19,40 @@ add_executable(Day11_Part1 Day11_Part1.cpp)
 add_executable(Day11_Part2 Day11_Part2.cpp)
 add_executable(Day12_Part1 Day12_Part1.cpp)
 add_executable(Day12_Part2 Day12_Part2.cpp)
-add_executable(Day13_Part1 Day13_Part1.cpp)
-add_executable(Day13_Part2 Day13_Part2.cpp)
 add_executable(Day14_Part1 Day14_Part1.cpp)
 add_executable(Day14_Part2 Day14_Part2.cpp)
 
-
 add_subdirectory(Intcode)
+add_subdirectory(Day13)
+
+
+add_executable(Day13 Day13/src/main.cpp)
+target_link_libraries(Day13 PUBLIC Day13_lib IntcodeLib)
+target_include_directories(Day13_lib PUBLIC ${CMAKE_CURRENT_LIST_DIR}/Intcode)
+target_include_directories(Day13_main PUBLIC ${CMAKE_CURRENT_LIST_DIR}/Intcode)
+
 
 add_library(Day15_lib
     Day15/Day15.h
     Day15/Day15.cpp)
-
 add_library(Day15_main
     Day15/main.cpp)
-
 add_executable(Day15 Day15/main.cpp)
-target_link_libraries(Day15 PUBLIC IntcodeLib Day15_lib)
+target_link_libraries(Day15 PUBLIC IntcodeLib Day15_lib IntcodeLib)
 target_include_directories(Day15_lib PUBLIC ${CMAKE_CURRENT_LIST_DIR}/Intcode)
 target_include_directories(Day15_main PUBLIC ${CMAKE_CURRENT_LIST_DIR}/Intcode)
 
 add_library(Day16_lib Day16/Day16.h Day16/Day16.cpp)
 add_executable(Day16 Day16/main.cpp)
 target_link_libraries(Day16 PUBLIC Day16_lib)
+
+
+add_library(Day17_lib
+    Day17/Day17.h
+    Day17/Day17.cpp)
+add_library(Day17_main
+    Day17/main.cpp)
+add_executable(Day17 Day17/main.cpp)
+target_link_libraries(Day17 PUBLIC IntcodeLib Day17_lib)
+target_include_directories(Day17_lib PUBLIC ${CMAKE_CURRENT_LIST_DIR}/Intcode)
+target_include_directories(Day17_main PUBLIC ${CMAKE_CURRENT_LIST_DIR}/Intcode)

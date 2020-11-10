@@ -90,13 +90,6 @@ private:
 
     Direction Backtrack();
 
-// DFS
-private:
-    Panel m_Panel;
-    Droid m_Droid;
-    std::stack<std::pair<int, int>> m_SuspendedVertexes;
-    uint8_t m_Dir;
-
 
 // Shortest Path
 public:
@@ -134,11 +127,6 @@ private:
     }
 
 
-// Shortest Path
-private:
-    std::set<std::pair<int, int>> m_Visited;
-
-
 // Part2 Fill with oxygen
 public:
     void CaluclateTimeToFillOxygen(uint16_t& timeElapsed);
@@ -149,7 +137,18 @@ private:
     bool IsFullOfOxygen();
 
     void FillAdjacent();
-};
 
+
+private:
+    // DFS
+    Panel m_Panel;
+    Droid m_Droid;
+    std::stack<std::pair<int, int>> m_SuspendedVertexes;
+    uint8_t m_Dir;
+
+    // Shortest Path
+    std::set<std::pair<int, int>> m_Visited;
+
+};
 
 #endif

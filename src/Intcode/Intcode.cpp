@@ -9,12 +9,11 @@
 #include <exception>
 
 
-void IntcodeProgram::InitializeMemory()
+void IntcodeProgram::InitializeMemory(const char* filename)
 {
     std::cout << "InitializingMemory starts\n";
-
-    m_opcodes.clear();
-    std::ifstream input(m_filename);
+    
+    std::ifstream input(filename);
     std::string code;
 
     if (input.is_open())
@@ -35,8 +34,10 @@ void IntcodeProgram::InitializeMemory()
 }
 
 
-void IntcodeProgram::SetArgs(long &arg1, long& arg2, int& ip, std::vector<int>& param_modes, int& relative_base)
+void IntcodeProgram::SetArgs(int64_t &arg1, int64_t& arg2, const int64_t& ip, std::vector<int>& param_modes, int64_t& relative_base)
 {
+    if (ip < 0) { throw std::invalid_argument("IntcodeProgram::SetArgs negative ip..."); }
+
     arg1 = (param_modes[0] == 0) ? m_opcodes[m_opcodes[ip + 1]] :
     ((param_modes[0] == 1) ? m_opcodes[ip + 1] : m_opcodes[m_opcodes[ip + 1] + relative_base]);
 
@@ -54,8 +55,9 @@ void IntcodeProgram::FillWithZeros(std::vector<int>& param_modes)
 }
 
 
-void IntcodeProgram::SetMode(std::vector<int>& param_modes, int64_t& opcode, int ip)
+void IntcodeProgram::SetMode(std::vector<int>& param_modes, int64_t& opcode, const int64_t ip)
 {
+    CheckPosition(ip);
     param_modes.clear();
     int temp;
     opcode = m_opcodes[ip] % 100;
@@ -66,12 +68,22 @@ void IntcodeProgram::SetMode(std::vector<int>& param_modes, int64_t& opcode, int
         param_modes.emplace_back(temp % 10);
         temp /= 10;
     }
+    FillWithZeros(param_modes);
+}
+
+
+void IntcodeProgram::CheckPosition(const int64_t pos)
+{
+    if (pos < 0) { throw std::invalid_argument("IntcodeProgram::CheckPosition negative pos..."); }
+    if (pos >= m_opcodes.size()) { 
+        // m_opcodes.resize(pos); 
+        }
 }
 
 
 void IntcodeProgram::Operation()
 {
-    int ip = 0, relative_base = 0;
+    int64_t ip = 0, relative_base = 0;
     bool cont = true;
     std::vector<int> param_modes;
     while (ip < m_opcodes.size() && cont)
@@ -82,16 +94,15 @@ void IntcodeProgram::Operation()
         //         }
         int64_t opcode = m_opcodes[ip];
         SetMode(param_modes, opcode, ip);
-        FillWithZeros(param_modes);
 
         switch (opcode)
         {
             case OpCode::OP_ADD:
             {
-                long arg1, arg2, pos;
+                int64_t arg1, arg2, pos;
                 SetArgs(arg1, arg2, ip, param_modes, relative_base);
-
-                pos = (param_modes[2] == 0) ? m_opcodes[ip + 3] : ((param_modes[2] == 1) ? (ip + 3) : m_opcodes[ip + 3] + 		relative_base);
+                pos = (param_modes[2] == 0) ? m_opcodes[ip + 3] : ((param_modes[2] == 1) ? (ip + 3) : m_opcodes[ip + 3] + relative_base);
+                CheckPosition(pos);
 
                 m_opcodes[pos] = arg1 + arg2;
                 ip += 4;
@@ -99,30 +110,29 @@ void IntcodeProgram::Operation()
             }
             case OpCode::OP_MUL:
             {
-                long arg1, arg2, pos;
-
+                int64_t arg1, arg2, pos;
                 SetArgs(arg1, arg2, ip, param_modes, relative_base);
                 pos = (param_modes[2] == 0) ? m_opcodes[ip + 3] : ((param_modes[2] == 1) ? (ip + 3) : m_opcodes[ip + 3] + relative_base);
+                CheckPosition(pos);
 
                 m_opcodes[pos] = arg1 * arg2;
-
                 ip += 4;
                 break;
             }
             case OpCode::OP_IN:
             {
-                long pos;
-                pos = (param_modes[0] == 0) ? m_opcodes[ip + 1] : ((param_modes[0] == 1) ? ip + 1 : m_opcodes[ip + 1] + relative_base);
+                int64_t pos = (param_modes[0] == 0) ? m_opcodes[ip + 1] : ((param_modes[0] == 1) ? ip + 1 : m_opcodes[ip + 1] + relative_base);
+                CheckPosition(pos);
 
                 m_opcodes[pos] = OpInput();
-
                 ip += 2;
                 break;
             }
             case OpCode::OP_OUT:
             {
-                long arg1 = (param_modes[0] == 0) ? m_opcodes[m_opcodes[ip + 1]] : ((param_modes[0] == 1) ? m_opcodes[ip + 1] : m_opcodes[m_opcodes[ip + 1] + relative_base]);
-
+                int64_t pos = (param_modes[0] == 0) ? m_opcodes[ip + 1] : ((param_modes[0] == 1) ? ip + 1 : m_opcodes[ip + 1] + relative_base);
+                CheckPosition(pos);
+                int64_t arg1 = m_opcodes[pos];
                 if(OpOutput(arg1))
                 {
                     return;
@@ -133,9 +143,8 @@ void IntcodeProgram::Operation()
             }
             case OpCode::OP_JUMP_IF_TRUE:
             {
-                long arg1, arg2;
+                int64_t arg1, arg2;
                 SetArgs(arg1, arg2, ip, param_modes, relative_base);
-
                 if (arg1 != 0)
                 {
                     ip = arg2;
@@ -147,7 +156,7 @@ void IntcodeProgram::Operation()
             }
             case OpCode::OP_JUMP_IF_FALSE:
             {
-                long arg1, arg2;
+                int64_t arg1, arg2;
                 SetArgs(arg1, arg2, ip, param_modes, relative_base);
                 if (arg1 == 0)
                 {
@@ -160,9 +169,10 @@ void IntcodeProgram::Operation()
             }
             case OpCode::OP_LESS_THAN:
             {
-                long arg1, arg2, pos;
+                int64_t arg1, arg2, pos;
                 SetArgs(arg1, arg2, ip, param_modes, relative_base);
                 pos = (param_modes[2] == 0) ? m_opcodes[ip + 3] : ((param_modes[2] == 1) ? ip + 3 : m_opcodes[ip + 3] + relative_base);
+                CheckPosition(pos);
 
                 m_opcodes[pos] = (arg1 < arg2) ? 1 : 0;
                 ip += 4;
@@ -170,9 +180,10 @@ void IntcodeProgram::Operation()
             }
             case OpCode::OP_EQUALS:
             {
-                long arg1, arg2, pos;
+                int64_t arg1, arg2, pos;
                 SetArgs(arg1, arg2, ip, param_modes, relative_base);
                 pos = (param_modes[2] == 0) ? m_opcodes[ip + 3] : ((param_modes[2] == 1) ? ip + 3 : m_opcodes[ip + 3] + relative_base);
+                CheckPosition(pos);
 
                 m_opcodes[pos] = (arg1 == arg2) ? 1 : 0;
                 ip += 4;
@@ -180,8 +191,7 @@ void IntcodeProgram::Operation()
             }
             case OpCode::OP_REL_MODE:
             {
-                long arg1 = (param_modes[0] == 0) ? m_opcodes[m_opcodes[ip + 1]] : ((param_modes[0] == 1) ? m_opcodes[ip + 1] : m_opcodes[m_opcodes[ip + 1] + relative_base]);
-
+                int64_t arg1 = (param_modes[0] == 0) ? m_opcodes[m_opcodes[ip + 1]] : ((param_modes[0] == 1) ? m_opcodes[ip + 1] : m_opcodes[m_opcodes[ip + 1] + relative_base]);
                 relative_base += arg1;
 
                 ip += 2;
@@ -190,7 +200,6 @@ void IntcodeProgram::Operation()
             case OpCode::OP_TERMINATE:
             {
                 cont = false;
-
                 break;
             }
             default:
@@ -208,10 +217,10 @@ void IntcodeProgram::Operation()
 
 void IntcodeProgram::PrintOpcodes()
 {
-    std::cout << "Printm_opcodes starts \n";
+    std::cout << "IntcodeProgram::PrintOpcodes starts \n";
     for (auto& opcode : m_opcodes)
     {
         std::cout << opcode << ",";
     }
-    std::cout << "Printm_opcodes finished \n\n";
+    std::cout << "\nIntcodeProgram::PrintOpcodes finished \n\n";
 }

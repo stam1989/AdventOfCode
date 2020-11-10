@@ -16,7 +16,7 @@ class IntcodeProgram
 {
 public:
 
-    IntcodeProgram(const char* filename) : m_filename(filename), m_opcodes() { InitializeMemory(); }
+    IntcodeProgram(const char* filename) { InitializeMemory(filename); }
     virtual ~IntcodeProgram() = default;
 
     enum OpCode
@@ -38,24 +38,26 @@ public:
 
     void PrintOpcodes();
 
-    void InitializeMemory();
+    void InitializeMemory(const char* filename);
 
     void Operation();
 
-    std::vector<int64_t> inline GetOpcodes() { return m_opcodes; }
+    inline std::vector<int64_t>& GetOpcodes() { return m_opcodes; }
+
 private:
 
     void FillWithZeros(std::vector<int>& param_modes);
 
-    void SetMode(std::vector<int>& param_modes, int64_t& opcode, int ip);
+    void SetMode(std::vector<int>& param_modes, int64_t& opcode, const int64_t ip);
 
-    void SetArgs(long &arg1, long& arg2, int& ip, std::vector<int>& param_modes, int& relative_base);
+    void SetArgs(int64_t &arg1, int64_t& arg2, const int64_t& ip, std::vector<int>& param_modes, int64_t& relative_base);
+
+    void CheckPosition(const int64_t pos);
 
     virtual int64_t OpInput() = 0;
 
     virtual bool OpOutput(int64_t output)  = 0;
 
-    const char* m_filename;
     std::vector<int64_t> m_opcodes;
 };
 

@@ -12,7 +12,8 @@
 #include <fstream>
 #include <string>
 #include <sstream>
-
+#include <chrono>
+#include <thread>
 
 void Maze::InializePanel()
 {
@@ -205,7 +206,9 @@ bool Maze::OpOutput(int64_t status)
         }
 
         m_Panel[m_Droid.y][m_Droid.x] = "O";
-        // PrintPanel();
+        PrintPanel();
+        std::this_thread::sleep_for(std::chrono::milliseconds(17));
+        
         // return false;
     }
 
@@ -250,7 +253,9 @@ bool Maze::OpOutput(int64_t status)
         
     }
 
-    // PrintPanel();
+    PrintPanel();
+    std::this_thread::sleep_for(std::chrono::milliseconds(17));
+
     return false;
 }
 
@@ -356,6 +361,8 @@ void Maze::CaluclateTimeToFillOxygen(uint16_t& timeElapsed)
     timeElapsed++;
     if(!IsFullOfOxygen())
     {
+        PrintPanel();
+        std::this_thread::sleep_for(std::chrono::milliseconds(17));
         CaluclateTimeToFillOxygen(timeElapsed);
     }
 }

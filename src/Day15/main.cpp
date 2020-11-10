@@ -12,6 +12,7 @@ int main(int argc, char* argv[])
         // DFS
         intcode_program.Operation();
         intcode_program.PrintPanel();
+
         // Calculate Shortest Path to oxygen (Part 1)
         int32_t curDistance = 0;
         int32_t minDistance = INT32_MAX;
