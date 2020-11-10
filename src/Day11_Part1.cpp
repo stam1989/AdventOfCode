@@ -21,7 +21,7 @@
 
 typedef std::vector<std::pair<int, int>> PaintedPanels;    // a vector with the coords of the panels have been painted at least once
 
-static constexpr char FILENAME[] = "../../../resources/Day11.txt";
+static constexpr char FILENAME[] = "../resources/Day11.txt";
 static constexpr int row = 190;
 static constexpr int column = 190;
 

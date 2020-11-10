@@ -26,7 +26,7 @@ std::mutex mu;
 std::condition_variable cond_amp;
 
 
-static constexpr char FILENAME[] = "../../../resources/Day9.txt";
+static constexpr char FILENAME[] = "../resources/Day9.txt";
 static constexpr size_t AMPL_NUM = 5;
 
 enum OpCode

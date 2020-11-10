@@ -187,7 +187,7 @@ void PrintOpcodes(std::vector<int>& opcodes)
 
 int main(int argc, char* argv[])
 {
-    std::string FILE = "../../../resources/Day5.txt";
+    std::string FILE = "../resources/Day5.txt";
 
 	std::vector<int> opcodes;
 

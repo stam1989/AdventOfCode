@@ -26,7 +26,7 @@ using ReactInput = std::vector<std::pair<size_t, std::string>>;
 using ReactOutput = std::pair<size_t, std::string>;
 
 static uint32_t s_AllocCount = 0;
-static const char* filename = "../../../resources/Day14.txt";
+static const char* filename = "../resources/Day14.txt";
 
 void* operator new(size_t s)
 {

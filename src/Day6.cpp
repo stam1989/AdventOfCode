@@ -43,7 +43,7 @@ void FindOrbitNum(Orbits& orbits, int& count, std::string& o)
 
 int main(int argc, char* argv[])
 {
-    std::string FILE = "../../../resources/Day6.txt";
+    std::string FILE = "../resources/Day6.txt";
 
 	std::ifstream input(FILE);
 	Orbits orbits;

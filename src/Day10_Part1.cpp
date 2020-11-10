@@ -15,7 +15,7 @@
 #include <math.h>
 
 
-static constexpr char FILENAME[] = "../../../resources/Day10.txt";
+static constexpr char FILENAME[] = "../resources/Day10.txt";
 
 
 struct Point

@@ -25,7 +25,7 @@ void PrintResult(int& res)
 
 int main() {
 
-    std::string FILE = "../../../resources/Day1.txt";
+    std::string FILE = "../resources/Day1.txt";
 
 	std::ifstream input(FILE);
 	std::string line_input;

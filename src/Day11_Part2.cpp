@@ -22,7 +22,7 @@
 
 typedef std::vector<std::vector<uint8_t>> Panel;
 
-static constexpr char FILENAME[] = "../../../resources/Day11.txt";
+static constexpr char FILENAME[] = "../resources/Day11.txt";
 static constexpr int row = 110;
 static constexpr int column = 110;
 

@@ -16,7 +16,7 @@
 using Layers = std::vector <std::string>;
 static constexpr size_t WIDE = 25;
 static constexpr size_t TALL = 6;
-static constexpr char FILENAME[] = "../../../resources/Day8.txt";
+static constexpr char FILENAME[] = "../resources/Day8.txt";
 
 
 static inline void ltrim(std::string &s) {

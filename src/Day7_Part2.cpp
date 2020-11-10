@@ -268,7 +268,7 @@ void StartAmplifiers(std::array<int, 5>& settings, std::vector<int>& opcodes, st
 
 int main(int argc, char* argv[])
 {
-	std::string FILE = "../../../resources/Day7.txt";
+	std::string FILE = "../resources/Day7.txt";
 	
 	std::vector<int> opcodes;
 	
