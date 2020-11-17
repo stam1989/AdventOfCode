@@ -13,14 +13,23 @@
 
 int main()
 {
-    ASCII intcode("../resources/Day17.txt");
-    
+    ASCII intcode("../src/Day17/resources/Day17.txt");
+
+    // Part 1
     intcode.Operation();
-    intcode.PrintOpcodes();
+    intcode.PrintViews();
 
-    std::cout << "View size: " << intcode.GetView().size();
-    intcode.PrintView();
+    int64_t sum = intcode.LocateIntersections();
+    intcode.PrintViews();
+    std::cout << "The sum of the alignment parameters for the scaffold intersections is " << sum << "!!\n";
 
+
+    // Part 2
+
+    intcode.GetOpcodes()[0] = 2;    // Force the vacuum robot to wake up
+    // intcode.SetRobotsPosition();
+    intcode.Operation();
+    intcode.PrintViews();
 
     return 0;
 }

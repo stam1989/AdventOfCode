@@ -7,6 +7,7 @@
 //============================================================================
 
 #include "Day15.h"
+#include "Color.h"
 
 #include <iostream>
 #include <fstream>

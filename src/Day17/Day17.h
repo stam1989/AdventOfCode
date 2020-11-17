@@ -14,48 +14,62 @@
 #include "Intcode.h"
 #include <array>
 
-// static constexpr size_t COLUMN = 50;
-// static constexpr size_t ROW = 50;
-// using Panel = std::array<std::array<std::string, ROW>, COLUMN>;
 
 class ASCII : public IntcodeProgram
 {
 public:
-    ASCII(const char* filename) : IntcodeProgram(filename) {  }
+    ASCII(const char* filename) : IntcodeProgram(filename)
+    , m_View()
+    , m_Views()
+    , m_Vacuum()
+    , m_stage(0)
+    , m_mainMovementRoutine("C,A,B,A,B,A")
+    , m_movementFunctionA("L,6,R,12,L,6,L,10,L,10,R,6")
+    , m_movementFunctionB("L,6,R,12,L,4,L,6,R,6")
+    , m_movementFunctionC("L,6,R,12,R,6")
+    {}
+
     virtual ~ASCII() = default;
 
-    // struct VacuumRobot
-    // {
-    //     VacuumRobot() {}
-    //     ~VacuumRobot() {}
-
-    //     int x, y;
-    //     char facing;
-    // };
-
-
-    // void PrintPanel();
-
-    // enum Code
-    // {
-
-    // };
-
-    void PrintView();
-    
     virtual int64_t OpInput() override;
 
     virtual bool OpOutput(int64_t output) override;
+ 
+    struct VacuumRobot
+    {
+        void InitVacuum(int tx, int ty, char tfacing)
+        {
+            x = tx;
+            y = ty;
+            facing = tfacing;
+        }
 
-    inline std::vector<char> GetView() { return m_View; }
+        int x, y;
+        char facing;
+    };
+
+    void SetRobotsPosition();
+
+    void PrintViews();
+    
+    int64_t LocateIntersections();
 
 private:
     void InializePanel();
 
+    int GetColumns();
+
+
 private:
-    // Panel m_Panel;
     std::vector<char> m_View;
-    // VacuumRobot m_Vacuum;
+    std::vector<std::vector<char>> m_Views;
+    VacuumRobot m_Vacuum;
+    int m_stage;    //this is used when intcode program asks for input to know in wich stage we are
+
+    std::string m_mainMovementRoutine;
+    std::string m_movementFunctionA;
+    std::string m_movementFunctionB;
+    std::string m_movementFunctionC;
 }; 
 
 

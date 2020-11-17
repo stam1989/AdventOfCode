@@ -11,7 +11,7 @@
 
 void IntcodeProgram::InitializeMemory(const char* filename)
 {
-    std::cout << "InitializingMemory starts\n";
+    // std::cout << "InitializingMemory starts\n";
     
     std::ifstream input(filename);
     std::string code;
@@ -30,7 +30,7 @@ void IntcodeProgram::InitializeMemory(const char* filename)
         throw std::runtime_error(exception_string);
     }
 
-    std::cout << "InitializingMemory finished\n";
+    // std::cout << "InitializingMemory finished\n";
 }
 
 
@@ -75,18 +75,16 @@ void IntcodeProgram::SetMode(std::vector<int>& param_modes, int64_t& opcode, con
 void IntcodeProgram::CheckPosition(const int64_t pos)
 {
     if (pos < 0) { throw std::invalid_argument("IntcodeProgram::CheckPosition negative pos..."); }
-    if (pos >= m_opcodes.size()) { 
-        // m_opcodes.resize(pos); 
-        }
+    if (pos >= m_opcodes.size()) { m_opcodes.resize(pos + 1); }
 }
 
 
 void IntcodeProgram::Operation()
 {
     int64_t ip = 0, relative_base = 0;
-    bool cont = true;
+    bool halted = false;
     std::vector<int> param_modes;
-    while (ip < m_opcodes.size() && cont)
+    while (ip < m_opcodes.size() && !halted)
     {
         //         if (ip == 324)
         //         {
@@ -199,7 +197,7 @@ void IntcodeProgram::Operation()
             }
             case OpCode::OP_TERMINATE:
             {
-                cont = false;
+                halted = true;
                 break;
             }
             default:
