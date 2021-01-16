@@ -53,3 +53,9 @@ add_executable(Day17 Day17/main.cpp)
 target_link_libraries(Day17 PUBLIC IntcodeLib Day17_lib Color_lib)
 target_include_directories(Day17_lib PUBLIC ${CMAKE_CURRENT_LIST_DIR}/Intcode ${CMAKE_CURRENT_LIST_DIR}/Color)
 target_include_directories(Day17_main PUBLIC ${CMAKE_CURRENT_LIST_DIR}/Intcode)
+
+
+add_library(Day18_lib Day18/src/Day18.h Day18/src/Day18.cpp)
+add_executable(Day18 Day18/src/Day18.cpp)
+target_link_libraries(Day18 PUBLIC Day18_lib Color_lib)
+target_include_directories(Day18_lib PUBLIC ${CMAKE_CURRENT_LIST_DIR}/Color)

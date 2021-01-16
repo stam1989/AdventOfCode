@@ -25,11 +25,11 @@ int main()
 
 
     // Part 2
-
-    intcode.GetOpcodes()[0] = 2;    // Force the vacuum robot to wake up
+    ASCII intcode_Part2("../src/Day17/resources/Day17.txt");
+    intcode_Part2.GetOpcodes()[0] = 2;    // Force the vacuum robot to wake up
     // intcode.SetRobotsPosition();
-    intcode.Operation();
-    intcode.PrintViews();
+    intcode_Part2.Operation();
+    intcode_Part2.PrintViews();
 
     return 0;
 }
