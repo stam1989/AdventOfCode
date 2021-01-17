@@ -12,7 +12,6 @@
 
 #include <vector>
 #include <cstdint>
-#include <optional>
 #include <tuple>
 #include <iostream>
 
