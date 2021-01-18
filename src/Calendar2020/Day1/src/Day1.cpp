@@ -73,7 +73,7 @@ int main()
     uint32_t expected_sum = 2020;
     auto v = d.GetEntries();
 
-    auto[entry1, entry2] = d.FindTwoNumbers(expected_sum, v);
+    auto[entry1, entry2] = d.FindTwoNumbers<>(expected_sum, v);
     std::cout << "The two entries that sum to 2020 are: " << entry1 << ", " << entry2 << ", with product: " << entry1 * entry2 << "\n";
 
     auto[num1, num2, num3] = d.FindThreeNumbers(expected_sum);

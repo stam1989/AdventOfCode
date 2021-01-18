@@ -38,7 +38,10 @@ public:
 
             entries.erase(std::remove(entries.begin(), entries.end(), entries.front()));
         }
-    }
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wreturn-type"
+    } // disable warning about possibility of control reaches end of non-void function 
+#pragma GCC diagnostic pop
 
 
     std::tuple<uint32_t, uint32_t, uint32_t> FindThreeNumbers(uint32_t expected_sum);
