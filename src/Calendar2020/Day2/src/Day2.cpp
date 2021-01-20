@@ -54,6 +54,7 @@ Day2::Input Day2::Decode(std::string& s_input)
     const std::string space_delimiter(" ");
     input.max = stoi(s_input.substr(0, s_input.find(space_delimiter)));
     s_input.erase(0, s_input.find(space_delimiter) + space_delimiter.length());
+    
     // Set element
     input.element = s_input.substr(0, 1)[0];
     s_input.erase(s_input.begin(), s_input.begin() + 3); // delete begin + 3 since we need to delete the colon(":") and the space after the colon too. 
