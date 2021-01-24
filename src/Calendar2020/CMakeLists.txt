@@ -33,3 +33,7 @@ target_link_libraries(2020_Day7 PUBLIC 2020_Day7_lib)
 add_library(2020_Day8_lib Day8/src/Day8.h Day8/src/Day8.cpp)
 add_executable(2020_Day8 Day8/src/Day8.cpp)
 target_link_libraries(2020_Day8 PUBLIC 2020_Day8_lib)
+
+add_library(2020_Day9_lib Day9/src/Day9.h Day9/src/Day9.cpp)
+add_executable(2020_Day9 Day9/src/Day9.cpp)
+target_link_libraries(2020_Day9 PUBLIC 2020_Day9_lib)
