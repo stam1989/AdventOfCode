@@ -17,3 +17,19 @@ target_link_libraries(2020_Day3 PUBLIC 2020_Day3_lib 2020_Color_lib)
 add_library(2020_Day4_lib Day4/src/Day4.h Day4/src/Day4.cpp)
 add_executable(2020_Day4 Day4/src/Day4.cpp)
 target_link_libraries(2020_Day4 PUBLIC 2020_Day4_lib)
+
+add_library(2020_Day5_lib Day5/src/Day5.h Day5/src/Day5.cpp)
+add_executable(2020_Day5 Day5/src/Day5.cpp)
+target_link_libraries(2020_Day5 PUBLIC 2020_Day5_lib)
+
+add_library(2020_Day6_lib Day6/src/Day6.h Day6/src/Day6.cpp)
+add_executable(2020_Day6 Day6/src/Day6.cpp)
+target_link_libraries(2020_Day6 PUBLIC 2020_Day6_lib)
+
+add_library(2020_Day7_lib Day7/src/Day7.h Day7/src/Day7.cpp)
+add_executable(2020_Day7 Day7/src/Day7.cpp)
+target_link_libraries(2020_Day7 PUBLIC 2020_Day7_lib)
+
+add_library(2020_Day8_lib Day8/src/Day8.h Day8/src/Day8.cpp)
+add_executable(2020_Day8 Day8/src/Day8.cpp)
+target_link_libraries(2020_Day8 PUBLIC 2020_Day8_lib)
