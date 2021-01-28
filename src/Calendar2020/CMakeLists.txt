@@ -46,3 +46,7 @@ add_library(2020_Day11_lib Day11/src/Day11.h Day11/src/Day11.cpp)
 add_executable(2020_Day11 Day11/src/Day11.cpp)
 target_include_directories(2020_Day11_lib PUBLIC ${CMAKE_CURRENT_LIST_DIR}/Color)
 target_link_libraries(2020_Day11 PUBLIC 2020_Day11_lib 2020_Color_lib)
+
+add_library(2020_Day12_lib Day12/src/Day12.h Day12/src/Day12.cpp)
+add_executable(2020_Day12 Day12/src/Day12.cpp)
+target_link_libraries(2020_Day12 PUBLIC 2020_Day12_lib)
