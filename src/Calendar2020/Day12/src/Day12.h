@@ -12,6 +12,7 @@
 
 #include <vector>
 #include <cstdlib>
+#include <string>
 
 using SeatLayout = std::vector<std::vector<char>>;
 
@@ -20,33 +21,37 @@ class Day12
 public:
     Day12() { ReadFile(); }
 
-    void PrintInstructions();
-    void ExecuteInstructions();
-
     struct NavInstructions
     {
-        char dir;
+        std::string dir;
         int step;
     };
 
-    struct Ship
+        
+    struct Point
     {
-        Ship(): north(0), east(0), facing('E') {}
+        Point(): east(0), north(0), facing("E") {}
+        Point(int e, int n, std::string f) : east(e), north(n), facing(f) {}
 
-        int north, east;
-        char facing;
+        int east, north;
+        std::string facing;
     };
 
+    void PrintInstructions();
+    void ExecuteInstructions();
+    void ExecuteInstructions(Point& waypoint);
     inline int32_t GetShipsDistance() { return abs(m_ship.north) + abs(m_ship.east); } 
 
 private:
     std::vector<NavInstructions> m_instructions;
-    Ship m_ship;
+    Point m_ship;
     static constexpr char const *FILENAME = "../src/Calendar2020/Day12/resources/Day12.txt";
 
     void ReadFile();
-    void MoveShip(const NavInstructions& instr);
-    char GetDir(const NavInstructions& instr);
+    std::string RotateShip(const NavInstructions& instr);
+    void RotateWaypoint(Point& waypoint, const NavInstructions& instr);
+    void MoveWaypoint(Point& waypoint, const NavInstructions& instr);
+
 };
 
 
