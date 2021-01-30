@@ -50,3 +50,7 @@ target_link_libraries(2020_Day11 PUBLIC 2020_Day11_lib 2020_Color_lib)
 add_library(2020_Day12_lib Day12/src/Day12.h Day12/src/Day12.cpp)
 add_executable(2020_Day12 Day12/src/Day12.cpp)
 target_link_libraries(2020_Day12 PUBLIC 2020_Day12_lib)
+
+add_library(2020_Day13_lib Day13/src/Day13.h Day13/src/Day13.cpp)
+add_executable(2020_Day13 Day13/src/Day13.cpp)
+target_link_libraries(2020_Day13 PUBLIC 2020_Day13_lib)
