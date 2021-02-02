@@ -55,17 +55,14 @@ public:
 
     void Print();
     void PrintWithDelay();
-    long GetResult();
-    bool IsValid(const std::vector<std::pair<long, int>>& biwd);
-    long GetResultWithOffset();
-    int64_t findMinX();
+    int64_t GetResult();
     int64_t ChineseRemainderTheorem();
 
     struct Schedule
     {
-        long timestamp;
-        std::vector<long> busIDs;               //Part 1
-        std::vector<std::pair<long, int>> busIDs_withDelay;     //Part 2
+        int64_t timestamp;
+        std::vector<int64_t> busIDs;               //Part 1
+        std::vector<std::pair<uint64_t, int64_t>> busIDs_withDelay;     //Part 2
     };
 
 private:
@@ -73,7 +70,7 @@ private:
     static constexpr char const *FILENAME = "../src/Calendar2020/Day13/resources/Day13.txt";
 
     void ReadFile();
-    inline long GetMinutesToWait(const long id)
+    inline int64_t GetMinutesToWait(const int64_t id)
     {
         return ((((m_schedule.timestamp / id) + 1) *  id) - m_schedule.timestamp);
     }
