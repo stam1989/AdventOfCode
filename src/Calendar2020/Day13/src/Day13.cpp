@@ -11,7 +11,6 @@
 
 #include <fstream>
 #include <sstream>
-#include <numeric>
 
 
 void Day13::ReadFile()

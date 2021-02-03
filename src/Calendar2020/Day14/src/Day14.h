@@ -11,6 +11,7 @@
 #define DAY14_H
 
 #include <vector>
+#include <map>
 #include <cstdlib>
 #include <chrono>
 #include <iostream>
@@ -51,10 +52,27 @@ class Day14
 public:
     Day14() { ReadFile(); }
 
-    void Print();
-   
+    struct AddressData {
+        int64_t pos, value;
+    };
+
+    struct Program {
+        Program() {}
+        Program(std::string m, std::vector<AddressData> a) : mask(m), address(a) {}
+        std::string mask;
+        std::vector<AddressData> address;
+    };
+
+    void PrintInput();
+    void PrintValues();
+    void FillAddresses();
+    int64_t GetSum();
+    void DecodeVersion2();
+    void ApplyMaskToAddressAndStore(std::string value, const AddressData& ad);
+
 private:
-   
+    std::vector<Program> m_programInput;
+    std::map<int64_t, int64_t> m_values;
     static constexpr char const *FILENAME = "../src/Calendar2020/Day14/resources/Day14.txt";
 
     void ReadFile();
