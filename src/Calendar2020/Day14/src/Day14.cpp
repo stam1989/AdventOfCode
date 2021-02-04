@@ -12,7 +12,7 @@
 #include <fstream>
 #include <string>
 #include <bitset>
-
+#include <numeric>
 
 void Day14::ReadFile() {
     std::cout << "ReadFile starts\n";
@@ -90,10 +90,7 @@ void Day14::PrintValues() {
 
 
 int64_t Day14::GetSum() {
-    int64_t sum = 0;
-    for (const auto v : m_values) sum += v.second;
-
-    return sum;
+    return std::accumulate(m_values.begin(), m_values.end(), static_cast<int64_t>(0), [](auto a, const auto b) { return a + b.second; });
 }
 
 
@@ -140,8 +137,11 @@ int main() {
     d.FillAddresses();
     std::cout << "Sum is: " << d.GetSum() << "!\n";
 
-    d.DecodeVersion2();
-    std::cout << "Sum in Part 2 is: " << d.GetSum() << "!\n";
-
+    {
+        // with map it takes around 170ms, while with unordered map needs around 150ms!
+        Timer t;
+        d.DecodeVersion2();
+        std::cout << "Sum in Part 2 is: " << d.GetSum() << "!\n";
+    }
     return 0;
 }

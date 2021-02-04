@@ -11,7 +11,7 @@
 
 #include <fstream>
 #include <sstream>
-
+#include <numeric>
 
 void Day13::ReadFile()
 {
@@ -100,8 +100,10 @@ int64_t Day13::ChineseRemainderTheorem()
     auto v_biwd(m_schedule.busIDs_withDelay);
  
     // calculate the divisors' multiple
-    std::int64_t div_muls = 1;
-    for (auto& id : v_biwd)  div_muls *= id.first;
+    // std::int64_t div_muls = 1;
+    // for (auto& id : v_biwd)  div_muls *= id.first;
+    std::int64_t div_muls = std::accumulate(v_biwd.begin(), v_biwd.end(), static_cast<int64_t>(1),
+                                            [](auto a, const auto& b) { return a * b.first; });
 
     std::vector<int64_t> v_divMul, v_congruents;
     for(const auto& id : v_biwd)

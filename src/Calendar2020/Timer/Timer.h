@@ -7,12 +7,9 @@
 //============================================================================
 
 
-#ifndef DAY14_H
-#define DAY14_H
+#ifndef TIMER_H
+#define TIMER_H
 
-#include <vector>
-#include <unordered_map>
-#include <cstdlib>
 #include <chrono>
 #include <iostream>
 
@@ -44,38 +41,6 @@ public:
     }
 private:
     std::chrono::time_point<std::chrono::high_resolution_clock> m_StartTimepoint;
-};
-
-
-class Day14
-{
-public:
-    Day14() { ReadFile(); }
-
-    struct AddressData {
-        int64_t pos, value;
-    };
-
-    struct Program {
-        Program() {}
-        Program(std::string m, std::vector<AddressData> a) : mask(m), address(a) {}
-        std::string mask;
-        std::vector<AddressData> address;
-    };
-
-    void PrintInput();
-    void PrintValues();
-    void FillAddresses();
-    int64_t GetSum();
-    void DecodeVersion2();
-    void ApplyMaskToAddressAndStore(std::string value, const AddressData& ad);
-
-private:
-    std::vector<Program> m_programInput;
-    std::unordered_map<int64_t, int64_t> m_values;
-    static constexpr char const *FILENAME = "../src/Calendar2020/Day14/resources/Day14.txt";
-
-    void ReadFile();
 };
 
 

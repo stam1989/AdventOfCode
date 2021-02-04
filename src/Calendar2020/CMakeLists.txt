@@ -1,6 +1,9 @@
 add_library(2020_Color_lib Color/Color.h)
 SET_TARGET_PROPERTIES(2020_Color_lib PROPERTIES LINKER_LANGUAGE CXX)
 
+add_library(2020_Timer_lib Timer/Timer.h)
+SET_TARGET_PROPERTIES(2020_Timer_lib PROPERTIES LINKER_LANGUAGE CXX)
+
 add_library(2020_Day1_lib Day1/src/Day1.h Day1/src/Day1.cpp)
 add_executable(2020_Day1 Day1/src/Day1.cpp)
 target_link_libraries(2020_Day1 PUBLIC 2020_Day1_lib)
@@ -58,3 +61,8 @@ target_link_libraries(2020_Day13 PUBLIC 2020_Day13_lib)
 add_library(2020_Day14_lib Day14/src/Day14.h Day14/src/Day14.cpp)
 add_executable(2020_Day14 Day14/src/Day14.cpp)
 target_link_libraries(2020_Day14 PUBLIC 2020_Day14_lib)
+
+add_library(2020_Day15_lib Day15/src/Day15.h Day15/src/Day15.cpp)
+add_executable(2020_Day15 Day15/src/Day15.cpp)
+target_include_directories(2020_Day15_lib PUBLIC ${CMAKE_CURRENT_LIST_DIR}/Timer)
+target_link_libraries(2020_Day15 PUBLIC 2020_Day15_lib 2020_Timer_lib)
