@@ -71,3 +71,8 @@ add_library(2020_Day16_lib Day16/src/Day16.h Day16/src/Day16.cpp)
 add_executable(2020_Day16 Day16/src/Day16.cpp)
 target_include_directories(2020_Day16_lib PUBLIC ${CMAKE_CURRENT_LIST_DIR}/Timer)
 target_link_libraries(2020_Day16 PUBLIC 2020_Day16_lib 2020_Timer_lib)
+
+add_library(2020_Day17_lib Day17/src/Day17.h Day17/src/Day17.cpp)
+add_executable(2020_Day17 Day17/src/Day17.cpp)
+target_include_directories(2020_Day17_lib PUBLIC ${CMAKE_CURRENT_LIST_DIR}/Timer)
+target_link_libraries(2020_Day17 PUBLIC 2020_Day17_lib 2020_Timer_lib)
