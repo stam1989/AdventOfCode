@@ -19,8 +19,9 @@ class Day18
 public:
     Day18() { ReadFile(); }
 
-
+    inline int64_t GetSum() { return m_sum; }
 private:
+    int64_t m_sum;
   
     static constexpr char const *FILENAME = "../src/Calendar2020/Day18/resources/Day18.txt";
 

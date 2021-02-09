@@ -1,6 +1,9 @@
 add_library(2020_Color_lib Color/Color.h)
 SET_TARGET_PROPERTIES(2020_Color_lib PROPERTIES LINKER_LANGUAGE CXX)
 
+add_library(RecursiveParser_tinyexpr_lib RecursiveParser_tinyexpr/tinyexpr.h RecursiveParser_tinyexpr/tinyexpr.c)
+SET_TARGET_PROPERTIES(RecursiveParser_tinyexpr_lib PROPERTIES LINKER_LANGUAGE CXX)
+
 add_library(2020_Timer_lib Timer/Timer.h)
 SET_TARGET_PROPERTIES(2020_Timer_lib PROPERTIES LINKER_LANGUAGE CXX)
 
@@ -79,5 +82,5 @@ target_link_libraries(2020_Day17 PUBLIC 2020_Day17_lib 2020_Timer_lib)
 
 add_library(2020_Day18_lib Day18/src/Day18.h Day18/src/Day18.cpp)
 add_executable(2020_Day18 Day18/src/Day18.cpp)
-target_include_directories(2020_Day18_lib PUBLIC ${CMAKE_CURRENT_LIST_DIR}/Timer)
-target_link_libraries(2020_Day18 PUBLIC 2020_Day18_lib 2020_Timer_lib)
+target_include_directories(2020_Day18_lib PUBLIC ${CMAKE_CURRENT_LIST_DIR}/Timer ${CMAKE_CURRENT_LIST_DIR}/RecursiveParser_tinyexpr)
+target_link_libraries(2020_Day18 PUBLIC 2020_Day18_lib 2020_Timer_lib RecursiveParser_tinyexpr_lib)
