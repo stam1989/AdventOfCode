@@ -13,10 +13,6 @@
 
 #include <cstdlib>
 #include <vector>
-#include <map>
-#include <string>
-#include <algorithm>
-#include <set>
 
 using CubeMap3D = std::vector<std::vector<std::vector<char>>>;
 using CubeMap4D = std::vector<std::vector<std::vector<std::vector<char>>>>;
