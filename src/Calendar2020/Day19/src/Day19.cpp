@@ -98,64 +98,13 @@ void Day19::PrintUnresolved() {
 }
 
 
-std::string Day19::GetMessage(int16_t id) {
-    if (m_resolved.find(id) != m_resolved.end()) {
-        return m_resolved[id];
-    }
-    auto ruleOptions = m_unresolved[id];
-
-    std::string final;
-    for (auto option : ruleOptions) {
-        std::string strOps;
-        for (auto rule : option) {
-            std::string subOps = GetMessage(rule);
-
-            if (strOps.empty()) strOps = subOps;
-            else {
-                std::string combined;
-                for (auto s : subOps) {
-                    for (auto op : strOps) {
-                        combined.push_back(op);
-                        combined.push_back(s);
-                    }
-                }
-                strOps = combined;
-            }
-        }
-        final.append(strOps);
-    }
-    m_validMessages.emplace_back(final);
-
-    m_resolved[id] = final;
-
-    return final;
-}
-
-
-int16_t Day19::CountValidMessages(int16_t id) {
-    auto allPossiblities = GetMessage(id);
-    std::set<std::string> allSet;
-    for (auto a : allPossiblities)
-        allSet.emplace(a);
-
-    // auto count = 0;
-    // for (auto msg : msgs)
-    //     if msg in allSet:
-    //         count += 1
-    // print(count)
-
-    return m_validMessages.size();
-}
-
-
 int main() {
     Day19 d;
     d.PrintResolved();
     d.PrintUnresolved();
     {
         Timer t;
-        auto count = d.CountValidMessages(0);
-        std::cout << "Valid Messages count for rule 0 are: " << count << "!\n";
+        // std::cout << "Valid Messages count for rule 0 are: " << count << "!\n";
     }
 
     {

@@ -36,7 +36,6 @@ private:
 
     void ReadFile();
     void DecodeRule(std::string& input, std::vector<Rule>& rules);
-    std::string GetMessage(int16_t id);
 };
 
 
