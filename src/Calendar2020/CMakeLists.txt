@@ -84,3 +84,8 @@ add_library(2020_Day18_lib Day18/src/Day18.h Day18/src/Day18.cpp)
 add_executable(2020_Day18 Day18/src/Day18.cpp)
 target_include_directories(2020_Day18_lib PUBLIC ${CMAKE_CURRENT_LIST_DIR}/Timer ${CMAKE_CURRENT_LIST_DIR}/RecursiveParser_tinyexpr)
 target_link_libraries(2020_Day18 PUBLIC 2020_Day18_lib 2020_Timer_lib RecursiveParser_tinyexpr_lib)
+
+add_library(2020_Day19_lib Day19/src/Day19.h Day19/src/Day19.cpp)
+add_executable(2020_Day19 Day19/src/Day19.cpp)
+target_include_directories(2020_Day19_lib PUBLIC ${CMAKE_CURRENT_LIST_DIR}/Timer)
+target_link_libraries(2020_Day19 PUBLIC 2020_Day19_lib 2020_Timer_lib)
