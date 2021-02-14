@@ -16,7 +16,7 @@
 #include <unordered_map>
 #include <map>
 
-using Tile = std::vector<std::vector<char>>;
+using Tile = std::vector<std::string>;
 using Tiles = std::unordered_map<int32_t, Tile>;
 using TileSides = std::map<int32_t, std::vector<std::string>>;
 

@@ -94,3 +94,8 @@ add_library(2020_Day20_lib Day20/src/Day20.h Day20/src/Day20.cpp)
 add_executable(2020_Day20 Day20/src/Day20.cpp)
 target_include_directories(2020_Day20_lib PUBLIC ${CMAKE_CURRENT_LIST_DIR}/Timer)
 target_link_libraries(2020_Day20 PUBLIC 2020_Day20_lib 2020_Timer_lib)
+
+add_library(2020_Day20_Part2_lib Day20/src/Day20_Part2.h Day20/src/Day20_Part2.cpp)
+add_executable(2020_Day20_Part2 Day20/src/Day20_Part2.cpp)
+target_include_directories(2020_Day20_Part2_lib PUBLIC ${CMAKE_CURRENT_LIST_DIR}/Timer)
+target_link_libraries(2020_Day20_Part2 PUBLIC 2020_Day20_Part2_lib 2020_Timer_lib)

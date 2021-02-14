@@ -36,11 +36,8 @@ void Day20::ReadFile() {
             Tile temp_tiles;
             while(std::getline(inputFile, s_input)) {
                 if (s_input.empty()) break;
-                std::vector<char> temp_tile;
-                for (const char c : s_input) {
-                    temp_tile.emplace_back(c);
-                }
-                temp_tiles.emplace_back(temp_tile);
+                
+                temp_tiles.emplace_back(s_input);
             }
             m_tiles[temp_tileId] = temp_tiles;
         }
@@ -59,27 +56,29 @@ void Day20::PrintTiles() {
     for (const auto& tiles : m_tiles) {
         std::cout << "\nTile " << tiles.first << ":\n";
         for (const auto tileRow : tiles.second) {
-            for (const auto tileCol : tileRow) {
-                std::cout << tileCol;
-            }
-            std::cout << "\n";
+            std::cout << tileRow << "\n";
         }
     }
 }
 
 
 void Day20::GetSides() {
-
     for (const auto& t : m_tiles) {
         // we have 8 possible sides of the puzzle piece since it can be either rotated or flipped 
-        std::string top, bottom, left, right, rtop, rbottom, rleft, rright;
+
         auto it = m_tiles.find(t.first);
 
+        std::string top(t.second[0]);  // get top side
+        std::string rtop(top);
+        std::reverse(rtop.begin(), rtop.end()); // get top side reverse
+
+        std::string bottom(t.second[t.second.size() - 1]);  // get bottom side
+        std::string rbottom(bottom);
+        std::reverse(rbottom.begin(), rbottom.end());   // get bottom side reverse
+
+        std::string left, rleft, right, rright;
+
         for(int i = 0; i < t.second.size(); i++) {
-            top.push_back(t.second[0][i]);    // get top side
-            rtop.push_back(t.second[0][t.second.size() - 1 - i]);    // get top side reverse
-            bottom.push_back(t.second[t.second.size() - 1][i]);    // get bottom side
-            rbottom.push_back(t.second[t.second.size() - 1][t.second.size() - 1 - i]);    // get bottom side reverse
             left.push_back(t.second[i][0]);   // get left side
             rleft.push_back(t.second[t.second.size() - 1 - i][0]);   // get left side reverse
             right.push_back(t.second[i][t.second.size() - 1]);    // get right side
@@ -90,8 +89,6 @@ void Day20::GetSides() {
     }
       
 }
-
-
 
 
 int64_t Day20::GetCornerMultiple() {
@@ -110,7 +107,6 @@ int64_t Day20::GetCornerMultiple() {
 
     return res;
 }
-
 
 
 int main() {
