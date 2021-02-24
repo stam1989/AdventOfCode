@@ -124,3 +124,8 @@ add_library(2020_Day24_lib Day24/src/Day24.h Day24/src/Day24.cpp)
 add_executable(2020_Day24 Day24/src/Day24.cpp)
 target_include_directories(2020_Day24_lib PUBLIC ${CMAKE_CURRENT_LIST_DIR}/Timer ${CMAKE_CURRENT_LIST_DIR}/Color)
 target_link_libraries(2020_Day24 PUBLIC 2020_Day24_lib 2020_Timer_lib 2020_Color_lib)
+
+add_library(2020_Day25_lib Day25/src/Day25.h Day25/src/Day25.cpp)
+add_executable(2020_Day25 Day25/src/Day25.cpp)
+target_include_directories(2020_Day25_lib PUBLIC ${CMAKE_CURRENT_LIST_DIR}/Timer)
+target_link_libraries(2020_Day25 PUBLIC 2020_Day25_lib 2020_Timer_lib)

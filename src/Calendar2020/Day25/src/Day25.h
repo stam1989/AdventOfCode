@@ -7,24 +7,23 @@
 //============================================================================
 
 
-#ifndef DAY18_H
-#define DAY18_H
+#ifndef DAY25_H
+#define DAY25_H
 
 
 #include <cstdlib>
 
 
-class Day18
+class Day25
 {
 public:
-    Day18() { ReadFile(); }
 
+int64_t Transform(const int64_t& publicKey, const int64_t& subjectNumber);
+int64_t GetEncryptionKey(const int64_t& subjectNumber, const int64_t& loopSize);
 
 private:
   
-    static constexpr char const *FILENAME = "../src/Calendar2020/Day18/resources/Day18.txt";
 
-    void ReadFile();
 };
 
 
