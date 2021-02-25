@@ -77,7 +77,7 @@ int main()
     std::cout << "The two entries that sum to 2020 are: " << entry1 << ", " << entry2 << ", with product: " << entry1 * entry2 << "\n";
 
     auto[num1, num2, num3] = d.FindThreeNumbers(expected_sum);
-    std::cout << "The two entries that sum to 2020 are: " << num1 << ", " << num2 << ", " << num3 << ", with product: " << num1 * num2 * num3 << "\n";
+    std::cout << "The three entries that sum to 2020 are: " << num1 << ", " << num2 << ", " << num3 << ", with product: " << num1 * num2 * num3 << "\n";
 
     return 0;
 }
