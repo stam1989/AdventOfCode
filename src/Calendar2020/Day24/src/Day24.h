@@ -13,6 +13,9 @@
 
 #include <cstdlib>
 #include <vector>
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 
 using Tiles = std::vector<std::vector<char>>;
@@ -52,7 +55,7 @@ private:
     static constexpr int16_t REFERENCE_X = 70;
     static constexpr int16_t REFERENCE_Y = 70;
 
-    static constexpr char const *FILENAME = "../src/Calendar2020/Day24/resources/Day24.txt";
+    fs::path FILENAME = "../src/Calendar2020/Day24/resources/Day24.txt";
 
     void ReadFile();
 };
