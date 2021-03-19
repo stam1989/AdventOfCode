@@ -14,6 +14,7 @@
 #include <cstdint>
 #include <tuple>
 #include <iostream>
+#include <algorithm>
 
 class Day1
 {

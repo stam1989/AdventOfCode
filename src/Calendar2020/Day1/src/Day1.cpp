@@ -11,7 +11,6 @@
 #include "Day1.h"
 
 #include <fstream>
-#include <algorithm>
 
 
 void Day1::ReadFile()
